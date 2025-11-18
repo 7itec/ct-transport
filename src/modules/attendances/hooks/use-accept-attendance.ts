@@ -1,0 +1,42 @@
+import useApiMutation from "hooks/use-api-mutations";
+import useQueryHelpers from "hooks/use-query-helpers";
+import attendancesKeys from "../util/attendances-keys";
+import { AttendanceProps, AttendanceStatusEnum } from "../types";
+import { updateAttendanceStatus } from "../util/update-attendance-status";
+
+const useAcceptAttendance = (attendanceId: string) => {
+  const attendancesQuery = useQueryHelpers<AttendanceProps[]>(
+    attendancesKeys.list()
+  );
+  const attendanceQuery = useQueryHelpers<AttendanceProps>(
+    attendancesKeys.details(attendanceId)
+  );
+
+  const onSuccess = () => {
+    const attendances = attendancesQuery.data;
+    const attendance = attendanceQuery.data;
+
+    if (!attendances || !attendance) return;
+
+    const updatedAttendance = updateAttendanceStatus(
+      attendance,
+      AttendanceStatusEnum.Accepted
+    );
+
+    attendancesQuery.setData(
+      attendances!.map((someAttendance) =>
+        someAttendance._id === attendanceId ? updatedAttendance : someAttendance
+      )
+    );
+    attendanceQuery.setData(updatedAttendance);
+  };
+
+  return useApiMutation({
+    method: "PATCH",
+    url: `/jobs/${attendanceId}/accepted`,
+    errorTitle: "Erro ao aceitar atendimento",
+    onSuccess,
+  });
+};
+
+export default useAcceptAttendance;

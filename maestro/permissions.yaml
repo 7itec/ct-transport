@@ -1,0 +1,40 @@
+appId: com.simcorpi.driver
+---
+- launchApp:
+    appId: com.simcorpi.driver
+    permissions:
+      all: deny
+
+- tapOn: "Permitir localização"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible: "While using the app"
+
+- tapOn: "While using the app"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible: "Allow all the time"
+
+- tapOn: "Allow all the time"
+
+- back
+
+- tapOn: "Permitir câmera"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "While using the app"
+
+- tapOn: "Ativar notificações"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "Allow"
+
+- assertVisible: "Login"

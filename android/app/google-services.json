@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "68692388642",
+    "project_id": "control-tower-e301f",
+    "storage_bucket": "control-tower-e301f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:68692388642:android:0bd9c019bc9d89b6e6937b",
+        "android_client_info": {
+          "package_name": "com.controltower.transport"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXl6RJU-Xgmj7PBIhyo6WRbdPeK3SlyEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:68692388642:android:6efa6ab1de75ee17e6937b",
+        "android_client_info": {
+          "package_name": "com.koepe.ct.inspections"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXl6RJU-Xgmj7PBIhyo6WRbdPeK3SlyEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
