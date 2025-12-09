@@ -4,22 +4,18 @@ import { FlatList } from "react-native-gesture-handler";
 
 import useConductorVehicles from "modules/checklist/hooks/use-conductor-vehicles";
 
-import { StatusBar } from "expo-status-bar";
-import { useNavigation } from "@react-navigation/native";
-
 import BottomSheetOption from "components/bottom-sheet-option";
 import { VehicleProps } from "modules/checklist/types";
 
 import { Container, Header, Icon, SearchBox, Input, SubTitle } from "./styles";
 import CircleButton from "components/circle-button";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import Loading from "components/loading";
 import useCheckVehicleAvailability from "modules/checklist/hooks/use-check-vehicle-availability";
 import useAttachedVehicles from "modules/checklist/hooks/use-attached-vehicles";
 import useAttachedVehiclesStorage from "modules/checklist/storage/use-attached-vehicles-storage";
 
 const SelectVehicle: React.FC = () => {
-  const { goBack } = useNavigation();
   const [search, setSearch] = useState("");
   const [vehicleId, setVehicleId] = useState<string>();
   const { type = "CONDUCTOR" } = useLocalSearchParams<{
@@ -86,40 +82,38 @@ const SelectVehicle: React.FC = () => {
   );
 
   return (
-    <>
-      <StatusBar backgroundColor="white" translucent={false} />
-      <Container>
-        <Header>
-          <CircleButton onPress={goBack}>
-            <Icon name="arrow-back" size={24} />
-          </CircleButton>
-          <SearchBox>
-            <Icon name="search" color="black" size={18} />
-            <Input placeholder="Busque pela placa" onChangeText={setSearch} />
-          </SearchBox>
-        </Header>
-        {vehiclesQuery.isLoading && <Loading />}
-        {!vehiclesQuery.isLoading && (
-          <FlatList
-            data={plates}
-            ListHeaderComponent={<SubTitle>Veículos</SubTitle>}
-            ListEmptyComponent={
-              <View
-                style={{
-                  flex: 1,
-                  height: Dimensions.get("window").height - 100,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <SubTitle>Nenhum veículo encontrado</SubTitle>
-              </View>
-            }
-            {...{ renderItem }}
-          />
-        )}
-      </Container>
-    </>
+    <Container>
+      <Stack.Screen options={{ statusBarStyle: "dark" }} />
+      <Header>
+        <CircleButton onPress={router.back}>
+          <Icon name="arrow-back" size={24} />
+        </CircleButton>
+        <SearchBox>
+          <Icon name="search" color="black" size={18} />
+          <Input placeholder="Busque pela placa" onChangeText={setSearch} />
+        </SearchBox>
+      </Header>
+      {vehiclesQuery.isLoading && <Loading />}
+      {!vehiclesQuery.isLoading && (
+        <FlatList
+          data={plates}
+          ListHeaderComponent={<SubTitle>Veículos</SubTitle>}
+          ListEmptyComponent={
+            <View
+              style={{
+                flex: 1,
+                height: Dimensions.get("window").height - 100,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <SubTitle>Nenhum veículo encontrado</SubTitle>
+            </View>
+          }
+          {...{ renderItem }}
+        />
+      )}
+    </Container>
   );
 };
 

@@ -34,7 +34,6 @@ const Chat: React.FC = () => {
     chatSocket.emit("getRoom", { roomName: attendanceId });
 
     chatSocket.once("room", (room) => {
-      console.log(JSON.stringify(room.messages));
       if (room.messages) setMessages(room.messages);
     });
   }, []);

@@ -32,6 +32,9 @@
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH"
       android:value="ALWAYS" />
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0" />
+    <service android:name="com.transistorsoft.locationmanager.service.ActivityRecognitionService"
+      android:exported="false" android:foregroundServiceType="location"
+      tools:replace="android:foregroundServiceType,android:exported" />
     <activity android:name=".MainActivity"
       android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode"
       android:launchMode="singleTask" android:windowSoftInputMode="adjustResize"
@@ -48,10 +51,5 @@
         <data android:scheme="ct-transport" />
       </intent-filter>
     </activity>
-    <service
-      android:name="com.transistorsoft.locationmanager.service.ActivityRecognitionService"
-      android:exported="false"
-      android:foregroundServiceType="location"
-      tools:replace="android:foregroundServiceType,android:exported" />
   </application>
 </manifest>

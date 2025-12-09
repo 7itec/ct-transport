@@ -32,7 +32,6 @@ const useLunchStopLockState = () => {
   });
 
   useEffect(() => {
-    console.log(JSON.stringify(data?.currentWorkJourney));
     if (data?.currentWorkJourney?.driverStatus !== DriverStatus.STOPPED)
       router.replace("/");
   }, [data?.currentWorkJourney]);

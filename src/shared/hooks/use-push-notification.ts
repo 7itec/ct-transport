@@ -56,6 +56,12 @@ const usePushNotification = () => {
   };
 
   const setupPushNotifications = async () => {
+    await notifee.createChannel({
+      id: "important",
+      name: "Important Notifications",
+      importance: AndroidImportance.HIGH,
+    });
+
     await onMessage(messaging, onMessageReceived);
     await setBackgroundMessageHandler(messaging, onMessageReceived);
   };

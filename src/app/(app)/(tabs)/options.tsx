@@ -21,6 +21,9 @@ const Options: React.FC = () => {
 
   const { handleEndWorkDay, isLoading } = useHandleEndWorkJourney();
 
+  const conductorVehicle =
+    profileQuery.data?.currentWorkJourney?.conductorVehicle;
+
   const handleRemoveVehicle = () => {
     Alert.alert("Remover veículo", "Deseja realmente remover o veículo?", [
       { text: "Não" },
@@ -55,7 +58,7 @@ const Options: React.FC = () => {
           description: "Encerrar expediente e finalizar jornada de trabalho",
         }}
       />
-      {profileQuery.data?.currentWorkJourney?.conductorVehicle && (
+      {conductorVehicle && (
         <Option
           {...{
             name: "Liberar veículo",
@@ -76,18 +79,20 @@ const Options: React.FC = () => {
               <FontAwesome5 name="stopwatch" size={18} color={colors.white} />
             ),
             onPress: () => router.push("/work-journey/work-stops"),
-            description: "Marcar paradana jornada de trabalho",
+            description: "Realizar parada na jornada de trabalho",
           }}
         />
       )}
-      <Option
-        {...{
-          name: "Criar deslocamento",
-          icon: <Ionicons name="arrow-redo" size={18} color={colors.white} />,
-          onPress: () => router.push("/attendances/displacement"),
-          description: "Crie um deslocamento de retorno",
-        }}
-      />
+      {conductorVehicle && (
+        <Option
+          {...{
+            name: "Criar deslocamento",
+            icon: <Ionicons name="arrow-redo" size={18} color={colors.white} />,
+            onPress: () => router.push("/attendances/displacement"),
+            description: "Crie um deslocamento de retorno",
+          }}
+        />
+      )}
       <Option
         {...{
           name: "Meus dados",

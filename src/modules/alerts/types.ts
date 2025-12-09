@@ -1,4 +1,9 @@
 import {
+  AnsweredChecklistItemProps,
+  ChecklistItemProps,
+  VehicleProps,
+} from "modules/checklist/types";
+import {
   WorkRecordProps,
   WorkRecordRectificationProps,
 } from "modules/work-records/types";
@@ -42,4 +47,20 @@ export interface AlertProps {
   occurrences?: [];
   workRecord: WorkRecordProps;
   workRecordRectificationId?: string;
+}
+
+export interface OeaChecklistAlertProps extends AlertProps {
+  payload: {
+    job: number;
+    checklist: string;
+    vehicle: VehicleProps;
+    documentNumber: string;
+    checklistData: {
+      _id: string;
+      status: string;
+      pendingChecklistItems: ChecklistItemProps[];
+      approvedChecklistItems: AnsweredChecklistItemProps[];
+      disapprovedChecklistItems: AnsweredChecklistItemProps[];
+    };
+  };
 }

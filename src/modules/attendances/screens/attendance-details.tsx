@@ -18,11 +18,14 @@ import AttendanceMap from "../components/attendance-map";
 import StatusButton from "components/status-button";
 import Passenger from "../components/passenger";
 import { useEffect } from "react";
+import Material from "../components/material";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AttendanceDetails = () => {
   const { attendanceId } = useLocalSearchParams<{ attendanceId: string }>();
   const { data, isLoading, refetch } = useAttendanceDetails(attendanceId);
   const currentWorkJourneyQuery = useCurrentWorkJourney();
+  const { bottom } = useSafeAreaInsets();
 
   useEffect(() => {
     refetch();
@@ -42,7 +45,9 @@ const AttendanceDetails = () => {
         />
       </FloatingCard>
       <BottomSheet snapPoints={[290, "100%"]}>
-        <BottomSheetScrollView>
+        <BottomSheetScrollView
+          contentContainerStyle={{ paddingBottom: bottom + 15 }}
+        >
           <Content>
             <Column gap={10}>
               <Row justifyContent="space-between">
@@ -55,6 +60,9 @@ const AttendanceDetails = () => {
                   flexDirection: "column",
                 }}
               >
+                <Row>
+                  <RegularText size="small">{data?.routeSummary}</RegularText>
+                </Row>
                 <Row justifyContent="space-between">
                   <Column>
                     <MediumText>
@@ -106,7 +114,9 @@ const AttendanceDetails = () => {
             {data.observations && (
               <MediumText>Observação: {data.observations}</MediumText>
             )}
-            <MediumText>Passageiros</MediumText>
+            <MediumText>
+              {data?.tripulation?.length > 0 ? "Passageiros" : "Materiais"}
+            </MediumText>
             {data?.tripulation.map((passenger) => (
               <Passenger
                 key={passenger._id}
@@ -126,7 +136,7 @@ const AttendanceDetails = () => {
 
 export default AttendanceDetails;
 
-const Content = styled(BottomSheetView)`
+const Content = styled.View`
   width: 100%;
   padding: 15px;
   padding-bottom: 5px;

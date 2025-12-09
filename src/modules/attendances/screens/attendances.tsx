@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 
 import Button from "components/button";
 import { router, useFocusEffect } from "expo-router";
@@ -14,7 +14,7 @@ import styled from "styled-components/native";
 import Column from "components/column";
 import Row from "components/row";
 import dateFnsHelpers from "util/date-fns-helpers";
-import { FlatList, Image, StyleSheet, View } from "react-native";
+import { Alert, FlatList, Image, StyleSheet, View } from "react-native";
 import useAttendances from "modules/attendances/hooks/use-attendances";
 import { AttendanceProps } from "modules/attendances/types";
 import { ListRenderItemInfo } from "react-native";
@@ -39,11 +39,29 @@ const Attendances: React.FC = () => {
     attendancesQuery.refetch();
   };
 
+  const conductorVehicleId =
+    data?.currentWorkJourney?.conductorVehicle?._id ??
+    data?.currentWorkJourney?.conductorVehicle?.plate ??
+    null;
+
   useFocusEffect(
     useCallback(() => {
-      if (data?.currentWorkJourney?.conductorVehicle) attendancesQuery.fetch();
-    }, [data?.currentWorkJourney?.conductorVehicle])
+      if (conductorVehicleId) attendancesQuery.fetch();
+    }, [conductorVehicleId])
   );
+
+  // const checkAlertPendingIssues = useCallback(() => {
+  //   const pendingIssue = alertsQuery.data?.some(
+  //     (alert) => alert.protocol.priority === "ALTA"
+  //   );
+
+  //   if (pendingIssue)
+  //     Alert.alert(
+  //       "Alertas pendentes",
+  //       "Existem alertas pendentes, por favor verifique",
+  //       [{ text: "Ok", onPress: () => router.push("/alerts") }]
+  //     );
+  // }, []);
 
   const renderAttendance = useCallback(
     ({ item }: ListRenderItemInfo<AttendanceProps>) => (
@@ -70,7 +88,11 @@ const Attendances: React.FC = () => {
         />
         <Row gap={5} style={{ marginTop: 5 }}>
           <StatusButton
-            text={`Passgerios: ${item.tripulation.length}`}
+            text={`${item.tripulation.length ? "Passgerios" : "Materiais"}: ${
+              item.tripulation.length > 0
+                ? item.tripulation.length
+                : item.materials.length
+            }`}
             backgroundColor={colors.primary}
           />
           {item.isPcd && (
@@ -110,7 +132,7 @@ const Attendances: React.FC = () => {
       <Row gap={10}>
         <Image source={truckFilled} style={{ width: 30, height: 30 }} />
         <MediumText color="primary" size="medium">
-          SIMCORPI - Motorista
+          CT - Motorista
         </MediumText>
       </Row>
       <FlatList

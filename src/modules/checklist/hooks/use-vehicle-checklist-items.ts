@@ -11,6 +11,10 @@ export interface ChecklistItemProps {
   isForAllModels: boolean;
   alwaysRequireImage: boolean;
   active: boolean;
+  image?: string;
+  video?: string;
+  audio?: string;
+  content?: { text: string };
 }
 
 interface Props {

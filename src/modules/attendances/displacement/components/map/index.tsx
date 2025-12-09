@@ -71,7 +71,7 @@ const Map: React.FC<Props> = ({ coordinates, confirm, close }) => {
     <Container>
       <MapView
         style={{ flex: 1 }}
-        camera={{
+        initialCamera={{
           center,
           pitch: 0,
           heading: 0,

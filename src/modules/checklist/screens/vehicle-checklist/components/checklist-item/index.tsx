@@ -119,12 +119,12 @@ const ChecklistItem: React.FC<Props> = ({
       onPress: () => showAudioRecorder(true),
       visible: !attachments?.audio,
     },
-    {
-      label: "Anexar vídeo",
-      icon: "videocam-outline",
-      onPress: () => showVideoRecorder(true),
-      visible: !attachments?.video,
-    },
+    // {
+    //   label: "Anexar vídeo",
+    //   icon: "videocam-outline",
+    //   onPress: () => showVideoRecorder(true),
+    //   visible: !attachments?.video,
+    // },
   ];
 
   const handleApproveChecklistItem = () => {

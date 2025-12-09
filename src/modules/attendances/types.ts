@@ -46,6 +46,13 @@ export interface PassengerProps {
   registrationNumber?: number;
 }
 
+export interface MaterialProps {
+  _id: string;
+  name: string;
+  originAddress: AddressProps;
+  destinyAddress: AddressProps;
+}
+
 export enum AttendanceStatusEnum {
   Pending = "Programada",
   Accepted = "Aceito",
@@ -65,6 +72,7 @@ export interface AttendanceProps {
   endDate: Date;
   observations: string;
   tripulation: PassengerProps[];
+  materials: MaterialProps[];
   destinyAddress: AddressProps;
   originAddress: AddressProps;
   vehicle: VehicleProps;

@@ -20,7 +20,10 @@ import InputButton from "components/input-button";
 import InputGroup from "components/input-group";
 import states from "util/states";
 import { Stack } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const Displacement: React.FC = () => {
   const {
@@ -53,16 +56,18 @@ const Displacement: React.FC = () => {
     neighborhoodBottomSheet,
     showNeighborhoodBottomSheet,
   } = useDisplacementState();
+  const { bottom } = useSafeAreaInsets();
+
   return (
     <>
       <Stack.Screen
         options={{
           title: "Criar deslocamento",
           headerShown: true,
-          headerShadowVisible: true,
+          statusBarStyle: "dark",
         }}
       />
-      <Container>
+      <Container style={{ paddingBottom: bottom + 15 }}>
         <Content>
           <Title>Detalhes</Title>
           <InputButton

@@ -1,12 +1,66 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import { lunchIcon } from "assets/images";
 import Button from "components/button";
 import styled from "styled-components/native";
-import { colors } from "assets/colors";
 import Column from "components/column";
+import { useBackHandler } from "@react-native-community/hooks";
+import { WorkStopsEnum } from "../types";
+import useGps from "modules/geolocation/hooks/use-gps";
+import generateId from "util/generate-id";
+import useStop from "../hooks/use-stop";
+import useCreateAlert from "modules/alerts/hooks/use-create-alert";
+import { ProtocolNamesEnum } from "modules/alerts/types";
+import useCurrentWorkJourney from "../hooks/use-current-work-journey";
+import { router } from "expo-router";
+import useSkipLuncthTimeUntil from "modules/taks/storage/use-skip-lunch-time-until";
+import dateFnsHelpers from "util/date-fns-helpers";
 
 const LunchTimeNeeded: React.FC = () => {
+  useBackHandler(() => {
+    return true;
+  }, []);
+
+  const { latitude, longitude } = useGps();
+  const stopMutation = useStop();
+  const createAlertMutation = useCreateAlert();
+  const { data } = useCurrentWorkJourney();
+  const { setSkipLunchTimeUntil } = useSkipLuncthTimeUntil();
+
+  const handleLunchStop = useCallback(async () => {
+    const data = {
+      workStopId: WorkStopsEnum.meal,
+      latitude,
+      longitude,
+      registrationDate: new Date(),
+      id: generateId(),
+    };
+
+    await stopMutation.mutate(data);
+
+    router.dismiss();
+    router.replace("/");
+  }, [[latitude, longitude]]);
+
+  const handleStopLater = useCallback(async () => {
+    await createAlertMutation.mutate({
+      protocolName: ProtocolNamesEnum.RECUSA_PARADA_ALMOÇO_6H,
+      registrationDate: new Date(),
+      payload: {
+        latitude,
+        longitude,
+        driverName: data?.driverName,
+        driverId: data?.driverId,
+        vehicleId: data?.currentWorkJourney?.conductorVehicle?._id,
+      },
+    });
+
+    setSkipLunchTimeUntil(dateFnsHelpers.addSeconds(new Date(), 30));
+
+    router.dismiss();
+    router.replace("/");
+  }, [[latitude, longitude, data]]);
+
   return (
     <>
       <Container>
@@ -16,8 +70,17 @@ const LunchTimeNeeded: React.FC = () => {
           Você deve fazer uma pausa para alimentação agora!
         </Description>
         <Column gap={10} style={{ width: "100%" }}>
-          <Button label="Parar para alimentação" />
-          <Button label="Parar depois" />
+          <Button
+            label="Parar para alimentação"
+            isLoading={stopMutation.isLoading}
+            onPress={handleLunchStop}
+          />
+          <Button
+            label="Parar depois"
+            backgroundColor="error"
+            isLoading={createAlertMutation.isLoading}
+            onPress={handleStopLater}
+          />
         </Column>
       </Container>
     </>
@@ -56,7 +119,3 @@ const Description = styled.Text`
   opacity: 0.8;
   margin-bottom: 10px;
 `;
-
-const StopLaterButton = styled(Button).attrs({
-  backgroundColor: colors.error,
-})``;

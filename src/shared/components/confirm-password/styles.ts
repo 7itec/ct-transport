@@ -39,6 +39,7 @@ export const Input = styled.TextInput.attrs({
   width: 60%;
   text-align: center;
   height: 45px;
+  color: black;
 `;
 
 export const BiometricsButton = styled(Pressable)`

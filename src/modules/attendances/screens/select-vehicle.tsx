@@ -122,6 +122,7 @@ const Input = styled.TextInput.attrs({
   placeholderTextColor: "rgba(0, 0, 0, .4)",
 })`
   flex: 1;
+  color: black;
 `;
 
 const SubTitle = styled.Text`

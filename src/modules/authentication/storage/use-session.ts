@@ -28,7 +28,7 @@ const useSession = () => {
 
         if (
           dateFnsHelpers.differenceInSecondsFromNow(session.expiresAt) >
-          60 * 60 * 10
+          60 * 3
         )
           session.isSession = false;
 

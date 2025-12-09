@@ -29,8 +29,9 @@ const useHandleEndWorkJourney = () => {
 
   const handleEndWorkDay = async () => {
     const lunchTime = currentWorkJourney!.timing.stops.lunch.minutes;
+
     if (
-      group?.name === "Funcionário" &&
+      group?.name === "Motorista" &&
       dateFnsHelpers.differenceInHours(
         new Date(),
         new Date(currentWorkJourney!.registrationDate)

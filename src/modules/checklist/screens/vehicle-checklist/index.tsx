@@ -7,29 +7,25 @@ import { BoldText, RegularText, SemilBoldText } from "components/text";
 import useVehicleChecklistItems, {
   ChecklistItemProps,
 } from "modules/checklist/hooks/use-vehicle-checklist-items";
-import TitleBar from "components/title-bar";
 import { FlatList, ListRenderItemInfo, View } from "react-native";
 
 import ChecklistItem from "./components/checklist-item";
-import { StatusBar } from "expo-status-bar";
 import Button from "components/button";
 import useAnswerChecklist from "modules/checklist/hooks/use-answer-checklist";
 import useConfirmVehicle from "modules/work-journey/hooks/use-confirm-vehicle";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import useVehicleDetails from "modules/checklist/hooks/use-vehicle-details";
 import dateFnsHelpers from "util/date-fns-helpers";
 import useGps from "modules/geolocation/hooks/use-gps";
 import Column from "components/column";
 import Row from "components/row";
 import styled from "styled-components/native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { colors } from "assets/colors";
 import Option from "./components/option";
 import { VehicleProps } from "modules/checklist/types";
-import { atom, useAtom } from "jotai";
 import useAttachedVehiclesStorage from "modules/checklist/storage/use-attached-vehicles-storage";
 import AttachedVehicle from "./components/attached-vehice";
 import Empty from "components/empty";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface AttachmentProps {
   text?: string;
@@ -58,6 +54,7 @@ const VehicleChecklist: React.FC = () => {
   const [showChecklistItems, setShowChecklistItems] = useState(true);
   const { attachedVehicles, setAttachedVehicles } =
     useAttachedVehiclesStorage();
+  const { bottom } = useSafeAreaInsets();
 
   const {
     checklistItems,
@@ -207,9 +204,14 @@ const VehicleChecklist: React.FC = () => {
   };
 
   return (
-    <Container>
-      <TitleBar title="Checklist" />
-      <StatusBar backgroundColor="white" style="dark" translucent={false} />
+    <Container style={{ paddingBottom: 15 + bottom }}>
+      <Stack.Screen
+        options={{
+          title: "Checklist",
+          statusBarStyle: "dark",
+          headerShown: true,
+        }}
+      />
       {(isLoading || vehicleChecklistItemsQuery.isLoading) && <Loading />}
       {!isLoading && !vehicleChecklistItemsQuery.isLoading && (
         <FlatList
@@ -299,7 +301,7 @@ const VehicleChecklist: React.FC = () => {
                     </Column>
                   </Row>
                 </Card>
-                {data?.type === "CONDUCTOR" && (
+                {data?.type === "CONDUCTOR" && data?.canBeAttached && (
                   <>
                     <SemilBoldText>Ações</SemilBoldText>
                     <Row

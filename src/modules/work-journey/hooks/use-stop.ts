@@ -6,10 +6,11 @@ import {
   UserProps,
   WorkStopProps,
 } from "../types";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import usersKeys from "modules/users/util/users-keys";
 
 const useStop = () => {
+  const { redirect } = useLocalSearchParams<{ redirect: string }>();
   const { data: user, setData } = useQueryHelpers<UserProps>(
     usersKeys.profile()
   );
@@ -46,7 +47,10 @@ const useStop = () => {
       },
     });
 
-    router.back();
+    if (redirect !== "home") return router.back();
+
+    router.dismissAll();
+    router.replace("/");
   };
 
   return useApiMutation({

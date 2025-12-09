@@ -16,7 +16,7 @@ import styled from "styled-components/native";
 import useCameraPermission from "../storage/use-camera-permission";
 
 const Permissions: React.FC = () => {
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const { notificationsPermission, setNotificationsPermission } =
     useNotificationsPermission();
   const { locationPermission, setLocationPermission } = useLocationPermission();
@@ -80,7 +80,7 @@ const Permissions: React.FC = () => {
   };
 
   return (
-    <Container style={{ paddingTop: top + 15 }}>
+    <Container style={{ paddingTop: top + 15, paddingBottom: bottom + 15 }}>
       <Column style={{ alignSelf: "center", marginTop: 10 }}>
         <MediumText size="extra-large">Permissões do dispositivo</MediumText>
         <RegularText>

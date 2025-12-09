@@ -1,7 +1,8 @@
 import Pressable from "components/pressable";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 
-export const Container = styled.View`
+export const Container = styled(SafeAreaView)`
   background-color: white;
   padding: 15px;
   position: absolute;
@@ -21,4 +22,5 @@ export const TextInput = styled.TextInput`
   border-radius: 5px;
   text-align-vertical: top;
   padding: 10px;
+  color: black;
 `;

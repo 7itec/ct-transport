@@ -1,8 +1,6 @@
-import axios from "axios";
 import useApi from "hooks/use-api";
 import useStorage from "hooks/use-storage";
 import { useCallback, useEffect, useRef } from "react";
-import dateFnsHelpers from "util/date-fns-helpers";
 
 let __pingTimeout: ReturnType<typeof setTimeout> | null = null;
 let __pingRunnerActive = false;
@@ -22,7 +20,6 @@ const useServerConnection = () => {
     isRequesting.current = true;
     __lastPingAt = Date.now();
     try {
-      console.log("/health", dateFnsHelpers.format(new Date(), "HH:mm:ss"));
       await api.get("/health");
       setServerConnection(true);
     } catch (error) {

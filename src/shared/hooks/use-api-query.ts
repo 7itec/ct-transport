@@ -2,7 +2,7 @@ import useApi from "./use-api";
 import Toast from "react-native-toast-message";
 import decodeError from "util/decode-error";
 import { useMMKVStorage } from "react-native-mmkv-storage";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import storage from "util/storage";
 
 interface Props {
@@ -37,7 +37,7 @@ const useApiQuery = <T = any>({
 
   const api = useApi();
 
-  const request = async () => {
+  const request = useCallback(async () => {
     try {
       const response = await api({
         method: "GET",
@@ -54,23 +54,30 @@ const useApiQuery = <T = any>({
         text2: decodeError(error),
       });
     }
-  };
+  }, [url, params, errorTitle, setData]);
 
-  useEffect(() => {
-    if (!data && enabled) fetch();
-  }, []);
-
-  const fetch = async () => {
+  const fetch = useCallback(async () => {
     setIsLoading(true);
     await request();
     setIsLoading(false);
-  };
+  }, [request]);
 
-  const refetch = async () => {
+  const refetch = useCallback(async () => {
     setIsRefetching(true);
     await request();
     setIsRefetching(false);
-  };
+  }, [request]);
+
+  useEffect(() => {
+    if (
+      (!data ||
+        (!Array.isArray(data) &&
+          typeof data === "object" &&
+          Object.keys(data).length === 0)) &&
+      enabled
+    )
+      fetch();
+  }, [data, enabled, fetch]);
 
   return { data, isLoading, fetch, refetch, isRefetching };
 };

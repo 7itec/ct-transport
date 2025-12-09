@@ -18,13 +18,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { notificationEmitter } from "util/notification-emitter";
 import ErrorBoundary from "react-native-error-boundary";
 import ErrorHandler from "components/error-handler";
-import { getCrashlytics, log } from "@react-native-firebase/crashlytics";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { storage } = useStorageManager();
-  const crashlytics = getCrashlytics();
   const isServerConnection = useServerConnection();
 
   const router = useRouter();
@@ -48,10 +46,6 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    log(crashlytics, "App mounted.");
-  }, []);
-
-  useEffect(() => {
     if (storage) SplashScreen.hide();
   }, [storage]);
 
@@ -62,7 +56,7 @@ export default function RootLayout() {
       <GestureHandlerRootView>
         <ThemeProvider value={DefaultTheme}>
           <PortalProvider>
-            <Stack>
+            <Stack screenOptions={{ statusBarStyle: "dark" }}>
               <Stack.Screen name="(app)" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
               <Stack.Screen

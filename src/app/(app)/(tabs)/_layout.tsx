@@ -6,17 +6,26 @@ import dateFnsHelpers from "util/date-fns-helpers";
 import useSession from "modules/authentication/storage/use-session";
 import { RegularText } from "components/text";
 import { truck, truckFilled } from "assets/images";
-import { Image } from "react-native";
+import { Image, View } from "react-native";
 import { colors } from "assets/colors";
 import { DriverStatus, WorkStopsEnum } from "modules/work-journey/types";
 import usePassword from "modules/authentication/storage/use-password";
 import useUpdateRecentPosition from "modules/geolocation/hooks/use-update-recent-position";
+import useAlerts from "modules/alerts/hooks/use-alerts";
+import { useTasksVerification } from "modules/taks/hooks/use-tasks-verification";
 
 export default function TabLayout() {
   const { data } = useCurrentWorkJourney();
   const { session } = useSession();
   const { encryptedPassword } = usePassword();
   useUpdateRecentPosition();
+  useTasksVerification();
+
+  const alertsQuery = useAlerts();
+
+  const pendingAlerts = alertsQuery.data?.filter(
+    (alert) => alert.protocol.priority === "ALTA"
+  )?.length!;
 
   const shouldStopForLunch = () => {
     if (!data?.currentWorkJourney) return false;
@@ -98,11 +107,36 @@ export default function TabLayout() {
             </RegularText>
           ),
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name={focused ? "notifications" : "notifications-outline"}
-              color={focused ? colors.primary : colors.gray}
-              size={24}
-            />
+            <View>
+              <Ionicons
+                name={focused ? "notifications" : "notifications-outline"}
+                color={focused ? colors.primary : colors.gray}
+                size={24}
+              />
+              {pendingAlerts > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    right: -3,
+                    width: 15,
+                    height: 15,
+                    borderRadius: 7.5,
+                    backgroundColor: focused ? colors.white : colors.primary,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    elevation: 1,
+                  }}
+                >
+                  <RegularText
+                    color={focused ? "primary" : "white"}
+                    size="extra-small"
+                  >
+                    {pendingAlerts}
+                  </RegularText>
+                </View>
+              )}
+            </View>
           ),
         }}
       />

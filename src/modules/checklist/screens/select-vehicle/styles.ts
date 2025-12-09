@@ -1,8 +1,9 @@
-import styled from 'styled-components/native';
+import styled from "styled-components/native";
 
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export const Container = styled.View`
+export const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: white;
 `;
@@ -32,9 +33,10 @@ export const SearchBox = styled.View`
 `;
 
 export const Input = styled.TextInput.attrs({
-  placeholderTextColor: 'rgba(0, 0, 0, .4)',
+  placeholderTextColor: "rgba(0, 0, 0, .4)",
 })`
   flex: 1;
+  color: black;
 `;
 
 export const SubTitle = styled.Text`

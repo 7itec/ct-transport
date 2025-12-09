@@ -38,6 +38,7 @@ export const Input = styled.TextInput`
   flex: 1;
   padding: 0 10px;
   font-size: 18px;
+  color: black;
 `;
 
 export const Address = styled(Pressable)`

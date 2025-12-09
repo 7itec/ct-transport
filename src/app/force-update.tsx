@@ -45,7 +45,6 @@ const Container = styled.View`
 const Image = styled.Image`
   width: 200px;
   height: 200px;
-  background-color: red;
   align-self: center;
   object-fit: contain;
   margin-bottom: 50px;

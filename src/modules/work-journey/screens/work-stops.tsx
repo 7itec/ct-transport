@@ -7,7 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import BottomSheetOption from "components/bottom-sheet-option";
 
 import CircleButton from "components/circle-button";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import Loading from "components/loading";
 import styled from "styled-components/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ import { WorkStopProps, WorkStopsEnum } from "../types";
 import useStop from "../hooks/use-stop";
 import generateId from "util/generate-id";
 import useStopAttendance from "modules/attendances/hooks/use-stop-attendance";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const WorkStops: React.FC = () => {
   const { attendanceId } = useLocalSearchParams<{ attendanceId?: string }>();
@@ -75,50 +76,48 @@ const WorkStops: React.FC = () => {
   );
 
   return (
-    <>
-      <StatusBar backgroundColor="white" translucent={false} />
-      <Container>
-        <Header>
-          <CircleButton onPress={router.back}>
-            <Ionicons name="arrow-back" size={24} />
-          </CircleButton>
-          <SearchBox>
-            <Ionicons name="search" color="black" size={18} />
-            <Input placeholder="Buscar paradas" onChangeText={setSearch} />
-          </SearchBox>
-        </Header>
-        {(isLoading ||
-          stopMutation.isLoading ||
-          stopAttendanceMutation.isLoading) && <Loading />}
-        {!isLoading &&
-          !stopMutation.isLoading &&
-          !stopAttendanceMutation.isLoading && (
-            <FlatList
-              data={workStops}
-              ListHeaderComponent={<SubTitle>Paradas</SubTitle>}
-              ListEmptyComponent={
-                <View
-                  style={{
-                    flex: 1,
-                    height: Dimensions.get("window").height - 100,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <SubTitle>Nenhum parada encontrada</SubTitle>
-                </View>
-              }
-              {...{ renderItem }}
-            />
-          )}
-      </Container>
-    </>
+    <Container>
+      <Header>
+        <CircleButton onPress={router.back}>
+          <Ionicons name="arrow-back" size={24} />
+        </CircleButton>
+        <SearchBox>
+          <Ionicons name="search" color="black" size={18} />
+          <Input placeholder="Buscar paradas" onChangeText={setSearch} />
+        </SearchBox>
+      </Header>
+      {(isLoading ||
+        stopMutation.isLoading ||
+        stopAttendanceMutation.isLoading) && <Loading />}
+      {!isLoading &&
+        !stopMutation.isLoading &&
+        !stopAttendanceMutation.isLoading && (
+          <FlatList
+            data={workStops}
+            ListHeaderComponent={<SubTitle>Paradas</SubTitle>}
+            ListEmptyComponent={
+              <View
+                style={{
+                  flex: 1,
+                  height: Dimensions.get("window").height - 100,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <SubTitle>Nenhum parada encontrada</SubTitle>
+              </View>
+            }
+            {...{ renderItem }}
+          />
+        )}
+      <Stack.Screen options={{ statusBarStyle: "dark" }} />
+    </Container>
   );
 };
 
 export default WorkStops;
 
-const Container = styled.View`
+const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: white;
 `;
@@ -149,6 +148,7 @@ export const Input = styled.TextInput.attrs({
   placeholderTextColor: "rgba(0, 0, 0, .4)",
 })`
   flex: 1;
+  color: black;
 `;
 
 export const SubTitle = styled.Text`

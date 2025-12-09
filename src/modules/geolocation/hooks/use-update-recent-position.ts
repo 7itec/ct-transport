@@ -27,12 +27,6 @@ const useUpdateRecentPosition = () => {
 
       isRequesting.current = true;
       lastSentAtRef.current = now;
-      console.log(dateFnsHelpers.format(new Date(), "HH:mm:ss:SSS"), {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        speed: location.coords.speed,
-        heading: location.coords.heading,
-      });
 
       try {
         await api({

@@ -105,7 +105,7 @@ const Alert: React.FC<AlertProps> = (alert) => {
 
     const params = {
       alertId: alert._id,
-      workRecordId: alert.workRecord._id,
+      workRecordId: alert.workRecord?._id,
       text,
       audio,
       workRecordRectificationId: alert.workRecordRectificationId,
@@ -138,7 +138,7 @@ const Alert: React.FC<AlertProps> = (alert) => {
   return (
     <Container {...{ validated: !!validated }} onPress={handleAlertPress}>
       <Row justifyContent="space-between">
-        <Row gap={5}>
+        <Row gap={5} style={{ flexShrink: 1 }}>
           <MediumText>{protocol.title}</MediumText>
           {validateAlertMutation.isLoading && (
             <Loading size={18} flex={false} />

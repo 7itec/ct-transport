@@ -13,7 +13,6 @@ import dateFnsHelpers from "util/date-fns-helpers";
 import { router, Stack } from "expo-router";
 import useLogout from "modules/authentication/hooks/use-logout";
 import generateId from "util/generate-id";
-import Toast from "react-native-toast-message";
 import useGps from "modules/geolocation/hooks/use-gps";
 import useStartWorkJourney from "modules/work-journey/hooks/use-start-work-journey";
 import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
@@ -93,6 +92,20 @@ const StartWorkJourney: React.FC = () => {
     // }
 
     const _id = generateId();
+
+    if (
+      lastWorkJourneyEndedAt &&
+      dateFnsHelpers.differenceInHours(new Date(), lastWorkJourneyEndedAt) < 3
+    )
+      return Alert.alert(
+        "Erro ao iniciar jornada de trabalho",
+        "O período mínimo de descanso entre o fim de uma jornada de trabalho e o início da próxima deve ser de 3 horas.",
+        [
+          {
+            text: "Ok",
+          },
+        ]
+      );
 
     if (
       lastWorkJourneyEndedAt &&

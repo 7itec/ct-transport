@@ -3,8 +3,8 @@ export type VehicleProps = {
   plate: string;
   model: string;
   speedLimit: number;
-  checklistItems: ChecklistItem[];
-  disapprovedChecklistItems: ChecklistItem[];
+  checklistItems: ChecklistItemProps[];
+  disapprovedChecklistItems: ChecklistItemProps[];
   canSkipChecklist: boolean;
   hasImpedingItems: boolean;
   canBeAttached: boolean;
@@ -12,7 +12,7 @@ export type VehicleProps = {
   imageFile?: { url: string };
 };
 
-export type ChecklistItem = {
+export type ChecklistItemProps = {
   _id: string;
   status?: "A" | "R";
   name: string;
@@ -22,7 +22,27 @@ export type ChecklistItem = {
   video?: string;
   audio?: string;
   blocked?: boolean;
+  group: string;
   content?: { text: string };
   alwaysRequireImage: boolean;
   maintenanceItem?: boolean;
 };
+
+export interface FileProps {
+  url: string;
+  key: string;
+}
+
+export interface ReasonProps {
+  images?: FileProps[];
+  text?: string;
+  video?: FileProps;
+  audio?: FileProps;
+}
+
+export interface AnsweredChecklistItemProps {
+  checklistItem: ChecklistItemProps;
+  reason: ReasonProps;
+  status?: string;
+  type?: string;
+}
