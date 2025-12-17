@@ -14,15 +14,16 @@ import { Ionicons } from "@expo/vector-icons";
 import useRefuseReaons, {
   RefuseReasonProps,
 } from "../hooks/use-refuse-reasons";
-import useGps from "modules/geolocation/hooks/use-gps";
 import useRefuseAttendance from "../hooks/use-refuse-attendance";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const RefuseAttendance: React.FC = () => {
   const [search, setSearch] = useState("");
   const { data, isLoading } = useRefuseReaons();
   const { attendanceId } = useLocalSearchParams<{ attendanceId: string }>();
   const refuseAttendanceMutation = useRefuseAttendance(attendanceId);
-  const location = useGps();
+  const trackEvent = useLogs();
 
   const refuseReasons = useMemo(
     () =>
@@ -43,13 +44,18 @@ const RefuseAttendance: React.FC = () => {
         { text: "Cancelar" },
         {
           text: "Recusar",
-          onPress: () =>
+          onPress: async () => {
+            trackEvent("Attendance - Refused", { attendanceId });
+
+            const { latitude, longitude } = await getGpsCoordinates();
+
             refuseAttendanceMutation.mutate({
-              registrationDate: new Date(),
-              latitude: location?.latitude,
-              longitude: location?.longitude,
+              latitude,
+              longitude,
               jobRefusedReasonId,
-            }),
+              registrationDate: new Date(),
+            });
+          },
         },
       ]
     );

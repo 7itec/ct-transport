@@ -11,13 +11,14 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import Loading from "components/loading";
 import styled from "styled-components/native";
 import { Ionicons } from "@expo/vector-icons";
-import useGps from "modules/geolocation/hooks/use-gps";
 import useWorkStops from "../hooks/use-work-stops";
 import { WorkStopProps, WorkStopsEnum } from "../types";
 import useStop from "../hooks/use-stop";
 import generateId from "util/generate-id";
 import useStopAttendance from "modules/attendances/hooks/use-stop-attendance";
 import { SafeAreaView } from "react-native-safe-area-context";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const WorkStops: React.FC = () => {
   const { attendanceId } = useLocalSearchParams<{ attendanceId?: string }>();
@@ -25,7 +26,7 @@ const WorkStops: React.FC = () => {
   const { data, isLoading } = useWorkStops();
   const stopMutation = useStop();
   const stopAttendanceMutation = useStopAttendance(attendanceId as string);
-  const location = useGps();
+  const trackEvent = useLogs();
 
   const workStops = useMemo(
     () =>
@@ -39,36 +40,46 @@ const WorkStops: React.FC = () => {
   );
 
   const handleStopPress = useCallback(
-    (workStopId: string) => async () => {
-      const data = {
-        attendanceId,
-        workStopId,
-        latitude: location?.latitude,
-        longitude: location?.longitude,
-        registrationDate: new Date(),
-        id: generateId(),
-      };
+    ({ _id: workStopId, name: workStopReason }: WorkStopProps) =>
+      async () => {
+        const { latitude, longitude } = await getGpsCoordinates();
 
-      Alert.alert("Realizar parada", "Deseja realmente realizar a parada?", [
-        { text: "Voltar" },
-        {
-          text: "Parar",
-          onPress: () =>
-            attendanceId && workStopId === WorkStopsEnum.stopAttendance
-              ? stopAttendanceMutation.mutate(data)
-              : stopMutation.mutate(data),
-        },
-      ]);
-    },
+        const data = {
+          latitude,
+          longitude,
+          attendanceId,
+          workStopId,
+          registrationDate: new Date(),
+          id: generateId(),
+        };
+
+        Alert.alert("Realizar parada", "Deseja realmente realizar a parada?", [
+          { text: "Voltar" },
+          {
+            text: "Parar",
+            onPress: () => {
+              trackEvent("Work Stop", {
+                workStopReason,
+                workStopId,
+                attendanceId,
+              });
+
+              if (attendanceId && workStopId === WorkStopsEnum.stopAttendance)
+                stopAttendanceMutation.mutate(data);
+              else stopMutation.mutate(data);
+            },
+          },
+        ]);
+      },
     [location]
   );
 
   const renderItem = useCallback(
-    ({ item: { _id, name } }: ListRenderItemInfo<WorkStopProps>) => (
+    ({ item: workStop }: ListRenderItemInfo<WorkStopProps>) => (
       <BottomSheetOption
         {...{
-          label: name,
-          onPress: handleStopPress(_id),
+          label: workStop.name,
+          onPress: handleStopPress(workStop),
         }}
       />
     ),

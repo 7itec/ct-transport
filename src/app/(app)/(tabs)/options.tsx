@@ -1,5 +1,10 @@
 import React from "react";
-import { FontAwesome, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import {
+  Entypo,
+  FontAwesome,
+  FontAwesome5,
+  Ionicons,
+} from "@expo/vector-icons";
 import { colors } from "assets/colors";
 import Option from "components/option";
 import Row from "components/row";
@@ -8,16 +13,18 @@ import { router } from "expo-router";
 import useSession from "modules/authentication/storage/use-session";
 import useHandleEndWorkJourney from "modules/work-journey/hooks/use-handle-end-work-journey";
 import useRemoveVehicle from "modules/work-journey/hooks/use-remove-vehicle";
-import useGps from "modules/geolocation/hooks/use-gps";
 import { Alert } from "react-native";
 import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import { DriverStatus } from "modules/work-journey/types";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const Options: React.FC = () => {
-  const location = useGps();
   const { endSession } = useSession();
   const removeVehicleMutation = useRemoveVehicle();
   const profileQuery = useCurrentWorkJourney();
+
+  const trackEvent = useLogs();
 
   const { handleEndWorkDay, isLoading } = useHandleEndWorkJourney();
 
@@ -29,12 +36,17 @@ const Options: React.FC = () => {
       { text: "Não" },
       {
         text: "Sim",
-        onPress: () =>
+        onPress: async () => {
+          trackEvent("Vehicles Released");
+
+          const { latitude, longitude } = await getGpsCoordinates();
+
           removeVehicleMutation.mutate({
-            latitude: location?.latitude,
-            longitude: location?.longitude,
+            latitude,
+            longitude,
             registrationDate: new Date(),
-          }),
+          });
+        },
       },
     ]);
   };
@@ -93,6 +105,14 @@ const Options: React.FC = () => {
           }}
         />
       )}
+      <Option
+        {...{
+          name: "Registros de trabalho",
+          icon: <Entypo name="news" size={18} color={colors.white} />,
+          onPress: () => router.push("/work-records"),
+          description: "Eventos da jornada de trabalho",
+        }}
+      />
       <Option
         {...{
           name: "Meus dados",

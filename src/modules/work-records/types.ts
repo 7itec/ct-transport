@@ -88,3 +88,19 @@ export interface MultiDateWorkRecordProps {
   newRegistrationDate: Date;
   registrationDate: Date;
 }
+
+export interface WorkRecordProps {
+  _id: string;
+  name: WorkRecordNames;
+  typeRef: WorkRecordFilterTypes;
+  registrationDate: Date;
+  translatedName: string;
+  workStopName?: string;
+  stoppedTimeInMinutes?: number;
+  previousWorkRecord?: {
+    registrationDate: Date;
+  };
+  nextWorkRecord: {
+    registrationDate: Date;
+  };
+}

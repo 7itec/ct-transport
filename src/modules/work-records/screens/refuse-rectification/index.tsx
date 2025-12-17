@@ -13,15 +13,19 @@ import Column from "components/column";
 import { Ionicons } from "@expo/vector-icons";
 import AudioPlayer from "components/audio-player";
 import useRefuseRectification from "modules/work-records/hooks/use-refuse-rectification";
+import useLogs from "hooks/use-logs";
 
 const RefuseRectification = () => {
-  const { workRecordRectificationId } = useLocalSearchParams<{
+  const { workRecordRectificationId, alertId } = useLocalSearchParams<{
     workRecordRectificationId: string;
+    alertId: string;
   }>();
   const [isShowingAudioRecorder, showAudioRecorder] = useState(false);
   const [isShowingAudioPlayer, showingAudioPlayer] = useState(false);
   const [audio, setAudio] = useState<string>();
   const [text, setText] = useState<string>();
+
+  const trackEvent = useLogs();
 
   const refuseRectificationMutationn = useRefuseRectification(
     workRecordRectificationId
@@ -38,6 +42,11 @@ const RefuseRectification = () => {
       } as any);
 
     if (text) formData.append("text", text);
+
+    trackEvent("Refuse Rectification", {
+      workRecordRectificationId,
+      alertId,
+    });
 
     refuseRectificationMutationn.mutate(formData);
   };

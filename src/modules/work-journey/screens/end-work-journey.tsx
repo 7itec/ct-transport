@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import Button from "components/button";
@@ -22,8 +22,9 @@ import generateId from "util/generate-id";
 import { DriverStatus } from "modules/work-journey/types";
 import useEndWorkJourney from "modules/work-journey/hooks/use-end-work-journey";
 import useResumeStop from "modules/work-journey/hooks/use-resume-stop";
-import useGps from "modules/geolocation/hooks/use-gps";
 import useCreateRectification from "modules/work-journey/hooks/use-create-rectification";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const EndWorkJourney: React.FC = () => {
   const { data, isLoading, refetch, isRefetching } = useCurrentWorkJourney();
@@ -32,7 +33,7 @@ const EndWorkJourney: React.FC = () => {
   const [isShowingTimePicker, showTimePicker] = useState(false);
   const [isShowingBottomsheet, showBottomSheet] = useState(false);
   const [date, setDate] = useState<Date>();
-  const location = useGps();
+  const trackEvent = useLogs();
 
   const endWorkJourneyMutation = useEndWorkJourney();
   const resumeStopMutation = useResumeStop();
@@ -58,6 +59,12 @@ const EndWorkJourney: React.FC = () => {
     if (!date) return;
     setDate(date);
   };
+
+  useEffect(() => {
+    trackEvent("Expired Work Journey", {
+      workJourneyDuration,
+    });
+  }, []);
 
   const handleEndWorkJorney = () => {
     if (!date)
@@ -114,27 +121,29 @@ const EndWorkJourney: React.FC = () => {
       ? dateFnsHelpers.addSeconds(date!, 1)
       : date;
 
+    const { latitude, longitude } = await getGpsCoordinates();
+
     if (isStopped)
       await resumeStopMutation.mutate({
+        latitude,
+        longitude,
         workStopId: lastWorkRecord.payload.workStopId,
         registrationDate: date,
-        latitude: location?.latitude,
-        longitude: location?.longitude,
       });
 
     await endWorkJourneyMutation.mutate({
+      latitude,
+      longitude,
       workRecordId,
-      latitude: location?.latitude,
-      longitude: location?.longitude,
       registrationDate: endWorkJourneyDate,
     });
 
     await createRectificationMutation.mutate({
+      latitude,
+      longitude,
       workRecordId,
       currentRegistrationDate: endWorkJourneyDate,
       previousRegistrationDate: new Date(),
-      latitude: location?.latitude,
-      longitude: location?.longitude,
     });
   };
 

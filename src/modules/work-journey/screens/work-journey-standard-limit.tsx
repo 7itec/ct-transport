@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { workJourneyStandardLimit } from "assets/images";
 import Button from "components/button";
@@ -15,6 +15,7 @@ import { ProtocolNamesEnum } from "modules/alerts/types";
 import useQueryHelpers from "hooks/use-query-helpers";
 import { UserProps } from "../types";
 import usersKeys from "modules/users/util/users-keys";
+import useLogs from "hooks/use-logs";
 
 const WorkJourneyStandardLimit: React.FC = () => {
   useBackHandler(() => {
@@ -25,6 +26,11 @@ const WorkJourneyStandardLimit: React.FC = () => {
   const { setData } = useQueryHelpers<UserProps>(usersKeys.profile());
 
   const { setSkipUninformedStopUntil } = useSkipUninformedStopUntil();
+  const trackEvent = useLogs();
+
+  useEffect(() => {
+    trackEvent("Standard Limit");
+  }, []);
 
   const { finishJourney } = useHandleEndWorkJourney();
   const createAlertMutation = useCreateAlert();
@@ -54,6 +60,10 @@ const WorkJourneyStandardLimit: React.FC = () => {
         driverId: data?.driverId,
         vehicleId: data?.currentWorkJourney?.conductorVehicle?._id,
       },
+    });
+
+    trackEvent("Standard Limit Ignored", {
+      companyConfigParameters: data?.companyConfigParameters,
     });
 
     if (!data?.currentWorkJourney) return;

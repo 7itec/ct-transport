@@ -19,11 +19,12 @@ import {
 } from "expo-image-picker";
 import Toast from "react-native-toast-message";
 import useUpdateAvatar from "../hooks/use-update-avatar";
-import TitleBar from "components/title-bar";
+import useLogs from "hooks/use-logs";
 
 const Profile: React.FC = () => {
   const { data, isLoading, refetch, isRefetching } = useCurrentWorkJourney();
   const updateAvatarMutation = useUpdateAvatar();
+  const trackEvent = useLogs();
 
   const handleGetAvatar = async () => {
     const { status } = await requestMediaLibraryPermissionsAsync();
@@ -38,6 +39,8 @@ const Profile: React.FC = () => {
     const { assets } = await launchImageLibraryAsync();
 
     if (!assets) return;
+
+    trackEvent("Update Profile Image");
 
     updateAvatarMutation.mutate(assets[0].uri);
   };

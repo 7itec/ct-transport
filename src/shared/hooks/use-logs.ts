@@ -3,13 +3,16 @@ import { useCallback, useEffect } from "react";
 import { nativeApplicationVersion } from "expo-application";
 import useToken from "modules/authentication/storage/use-token";
 import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
+import useServerConnection from "modules/offline-processor/hooks/use-server-connection";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 type SendLog = (title: string, payload?: any) => void;
-const mixpanel = new Mixpanel("d301ae4b3798841789a10e61ef1ff2da", true);
+const mixpanel = new Mixpanel("272e48a8d9a3def26505260c43483f24", true);
 
 const useLogs = () => {
   const { token } = useToken();
   const { data } = useCurrentWorkJourney();
+  const isServerConnection = useServerConnection();
 
   useEffect(() => {
     if (token) initLogs();
@@ -34,35 +37,31 @@ const useLogs = () => {
   };
 
   const trackEvent: SendLog = useCallback(
-    (title: string, payload?: any) => {
+    async (title: string, payload?: any) => {
+      const { latitude, longitude } = await getGpsCoordinates();
+
       mixpanel.track(title, {
         ...payload,
         date: new Date().toISOString(),
-        // currentWorkJourney,
-        // isConnected,
-        // driverId,
-        // driverName,
-        // tasks,
-        // requests: requests.filter((request) => request.url !== '/alerts'),
-        // alerts: requests.filter((request) => request.url === '/alerts'),
-        // latitude,
-        // longitude,
-        // company: companyName,
+        currentWorkJourney: data?.currentWorkJourney,
+        isServerConnection,
+        driverId: data?.driverId,
+        driverName: data?.driverName,
+        company: data?.companyName,
+        latitude,
+        longitude,
       });
     },
     [
-      // currentWorkJourney,
-      // isConnected,
-      // driverId,
-      // driverName,
-      // tasks,
-      // requests,
-      // latitude,
-      // longitude,
+      isServerConnection,
+      data?.currentWorkJourney,
+      data?.driverId,
+      data?.driverName,
+      data?.companyName,
     ]
   );
 
-  return { trackEvent };
+  return trackEvent;
 };
 
 export default useLogs;

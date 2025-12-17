@@ -15,16 +15,22 @@ import Toast from "react-native-toast-message";
 import useServerConnection from "modules/offline-processor/hooks/use-server-connection";
 import { RectificationTypes } from "modules/work-records/types";
 import { router } from "expo-router";
+import useLogs from "hooks/use-logs";
 
 const Alert: React.FC<AlertProps> = (alert) => {
   const { _id, protocol, createdAt, payload, validated, occurrences } = alert;
   const description = payload?.content?.text;
   const { finishJourney } = useHandleEndWorkJourney();
   const isServerConnection = useServerConnection();
+  const trackEvent = useLogs();
 
   const validateAlertMutation = useValidateAlert(_id);
 
   const handleAlertPress = () => {
+    trackEvent("Alert Opened", {
+      alertId: alert._id,
+    });
+
     if (!payload && protocol.name !== ProtocolNamesEnum.EXCESSO_VELOCIDADE)
       return;
 
@@ -75,7 +81,10 @@ const Alert: React.FC<AlertProps> = (alert) => {
         );
       case ProtocolNamesEnum.PRENCHER_CHECKLIST_OEA_PALLET:
       case ProtocolNamesEnum.PRENCHER_CHECKLIST_OEA:
-        return "";
+        return router.push({
+          pathname: "/alerts/[alertId]/oea",
+          params: { alertId: _id },
+        });
       default:
         return RNAlert.alert(
           protocol.title,

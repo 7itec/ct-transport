@@ -8,6 +8,7 @@ import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-j
 import useFinishCampaign from "modules/work-journey/hooks/use-finish-campaign";
 import { RegularText } from "components/text";
 import Loading from "components/loading";
+import useLogs from "hooks/use-logs";
 
 const Edds: React.FC = () => {
   const { data } = useCurrentWorkJourney();
@@ -16,6 +17,7 @@ const Edds: React.FC = () => {
   const [isFinished, setFinished] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const videoRef = useRef<VideoView>(null);
+  const trackEvent = useLogs();
 
   const player = useVideoPlayer(
     { uri: data?.pendingCampaign?.video },
@@ -60,7 +62,12 @@ const Edds: React.FC = () => {
             {...{ player }}
           />
         )}
-        <FinishButton onPress={() => finishCampaignMutation.mutate()}>
+        <FinishButton
+          onPress={() => {
+            trackEvent("Campaign Video Finished");
+            finishCampaignMutation.mutate();
+          }}
+        >
           <RegularText color="white">
             {!finishCampaignMutation.isLoading && isFinished && "Finalizar"}
             {!finishCampaignMutation.isLoading && !isFinished && "Aguarde"}

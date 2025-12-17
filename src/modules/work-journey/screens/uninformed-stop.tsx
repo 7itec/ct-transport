@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { uninformedStop } from "assets/images";
 import Button from "components/button";
@@ -8,11 +8,14 @@ import { useBackHandler } from "@react-native-community/hooks";
 import { router } from "expo-router";
 import dateFnsHelpers from "util/date-fns-helpers";
 import useSkipUninformedStopUntil from "modules/taks/storage/use-skip-uninformed-stop-until";
+import useLogs from "hooks/use-logs";
 
 const UninformedStop: React.FC = () => {
   useBackHandler(() => {
     return true;
   }, []);
+
+  const trackEvent = useLogs();
 
   const { setSkipUninformedStopUntil } = useSkipUninformedStopUntil();
 
@@ -29,6 +32,10 @@ const UninformedStop: React.FC = () => {
     router.dismiss();
     router.replace("/");
   }, [setSkipUninformedStopUntil]);
+
+  useEffect(() => {
+    trackEvent("Uninformed Stop");
+  }, []);
 
   return (
     <>

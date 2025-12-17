@@ -1,4 +1,6 @@
+import { AxiosError } from "axios";
 import useApi from "hooks/use-api";
+import useLogs from "hooks/use-logs";
 import useStorage from "hooks/use-storage";
 
 export interface OfflineRequestProps {
@@ -15,6 +17,8 @@ export interface OfflineRequestProps {
 
 const useOfflineRequests = () => {
   const api = useApi();
+  const trackEvent = useLogs();
+
   const [requests, setRequests] = useStorage<OfflineRequestProps[]>(
     "requests",
     []
@@ -57,6 +61,14 @@ const useOfflineRequests = () => {
       await api(request);
       updateOfflineRequest({ ...request, status: "success" });
     } catch (error) {
+      trackEvent("Offline Request Error", {
+        numberOfTries: request.numberOfTries + 1,
+        error: JSON.stringify((error as AxiosError).response?.data),
+        url: request.url,
+        data: request.data,
+        headers: request.headers,
+        failedAt: new Date().toISOString(),
+      });
       updateOfflineRequest({
         ...request,
         numberOfTries: request.numberOfTries + 1,

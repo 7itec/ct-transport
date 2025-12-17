@@ -3,15 +3,16 @@ import { ConfirmPasswordRefProps } from "components/confirm-password";
 import Toast from "react-native-toast-message";
 import useServerConnection from "modules/offline-processor/hooks/use-server-connection";
 import useAlert from "modules/alerts/hooks/use-alert";
-import useGps from "modules/geolocation/hooks/use-gps";
 import useRectifyMultipleDates from "modules/work-records/hooks/use-rectify-multiple-dates";
 import { MultiDateWorkRecordProps } from "modules/work-records/types";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const useRectifyMultipleDatesState = (alertId: string) => {
   const { data, isLoading } = useAlert(alertId);
   const confirmPasswordRef = useRef<ConfirmPasswordRefProps>(null);
 
-  const { latitude, longitude } = useGps();
+  const trackEvent = useLogs();
 
   const rectifyMultipleDatesMutation = useRectifyMultipleDates(
     data?.workRecordRectificationId!
@@ -27,6 +28,12 @@ const useRectifyMultipleDatesState = (alertId: string) => {
         text2:
           "Não é possível alterar as datas dos registros de trabalho sem conexão com a internet",
       });
+
+    trackEvent("Multiple Date Rectification Opened", {
+      alertId,
+    });
+
+    const { latitude, longitude } = await getGpsCoordinates();
 
     rectifyMultipleDatesMutation.mutate({
       latitude,

@@ -1,6 +1,7 @@
 import { useBackHandler } from "@react-native-community/hooks";
 import { router } from "expo-router";
-import useGps from "modules/geolocation/hooks/use-gps";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 import useCancelStop from "modules/work-journey/hooks/use-cancel-stop";
 import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import useResumeStop from "modules/work-journey/hooks/use-resume-stop";
@@ -13,7 +14,8 @@ import generateId from "util/generate-id";
 
 const useLunchStopLockState = () => {
   const { data } = useCurrentWorkJourney();
-  const { latitude, longitude } = useGps();
+
+  const trackEvent = useLogs();
 
   const workStopId =
     data?.currentWorkJourney?.lastWorkRecord?.payload?.workStopId;
@@ -32,12 +34,21 @@ const useLunchStopLockState = () => {
   });
 
   useEffect(() => {
+    trackEvent("Lunch Stop Lock");
+  }, []);
+
+  useEffect(() => {
     if (data?.currentWorkJourney?.driverStatus !== DriverStatus.STOPPED)
       router.replace("/");
   }, [data?.currentWorkJourney]);
 
   const handleResumeDriverStop = () => {
     if (!data?.currentWorkJourney) return;
+
+    trackEvent("Finish Stop", {
+      workStopName: "Horário de alimentação",
+      workStopId: WorkStopsEnum.meal,
+    });
 
     const lunchStops = data?.currentWorkJourney.stopCounts.lunch;
 
@@ -65,11 +76,13 @@ const useLunchStopLockState = () => {
         {
           text: "Confirmar",
           onPress: async () => {
+            const { latitude, longitude } = await getGpsCoordinates();
+
             resumeStopMutation.mutate({
-              workStopId:
-                data?.currentWorkJourney?.lastWorkRecord?.payload?.workStopId,
               latitude,
               longitude,
+              workStopId:
+                data?.currentWorkJourney?.lastWorkRecord?.payload?.workStopId,
               registrationDate: new Date(),
               id: generateId(),
             });
@@ -95,6 +108,8 @@ const useLunchStopLockState = () => {
       {
         text: "Confirmar",
         onPress: async () => {
+          const { latitude, longitude } = await getGpsCoordinates();
+
           cancelStopMutation.mutate({
             latitude,
             longitude,

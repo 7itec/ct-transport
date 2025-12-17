@@ -7,6 +7,7 @@ import useServerConnection from "modules/offline-processor/hooks/use-server-conn
 import { BottomSheetOptionProps } from "components/bottom-sheet";
 import axios from "axios";
 import locationIqToAdress from "util/location-iq-to-adress";
+import useLogs from "hooks/use-logs";
 
 interface CreateDisplacementAddressProps {
   address: string;
@@ -35,6 +36,7 @@ const useDisplacementState = () => {
   const [timePicker, showTimePicker] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const trackEvent = useLogs();
 
   const createDisplacementMutation = useCreateDisplacement();
 
@@ -117,6 +119,12 @@ const useDisplacementState = () => {
 
     if (!address?.state)
       return showError("Erro no endereço", "Estado não informado");
+
+    trackEvent("Create Displacement", {
+      type,
+      startDate,
+      address,
+    });
 
     createDisplacementMutation.mutate({
       type,

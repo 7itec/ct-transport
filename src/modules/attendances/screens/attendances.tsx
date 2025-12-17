@@ -39,6 +39,8 @@ const Attendances: React.FC = () => {
     attendancesQuery.refetch();
   };
 
+  const attachedVehicles = data?.currentWorkJourney?.attachedVehicles;
+
   const conductorVehicleId =
     data?.currentWorkJourney?.conductorVehicle?._id ??
     data?.currentWorkJourney?.conductorVehicle?.plate ??
@@ -204,6 +206,29 @@ const Attendances: React.FC = () => {
                   </MediumText>
                 </Column>
               </Row>
+              {attachedVehicles?.length && (
+                <>
+                  <View
+                    style={{
+                      width: "100%",
+                      height: 1,
+                      backgroundColor: "rgba(128, 128, 128, .4)",
+                      marginTop: 10,
+                      marginBottom: 5,
+                    }}
+                  />
+                  <Row>
+                    <Column>
+                      <LightText size="small">Veículos acoplados</LightText>
+                      <MediumText size="small">
+                        {data?.currentWorkJourney?.attachedVehicles
+                          ?.map((vehicle) => vehicle.plate)
+                          .join(", ")}
+                      </MediumText>
+                    </Column>
+                  </Row>
+                </>
+              )}
             </Card>
             <SemilBoldText size="medium">Atendimentos</SemilBoldText>
           </Column>

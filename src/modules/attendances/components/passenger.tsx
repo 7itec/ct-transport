@@ -8,13 +8,13 @@ import AttendanceAddress from "./attendance-address";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { AttendanceStatusEnum, PassengerProps } from "../types";
 import useCheckIn from "../hooks/use-check-in";
-import useGps from "modules/geolocation/hooks/use-gps";
 import BottomSheet, { BottomSheetOptionProps } from "components/bottom-sheet";
 import useCheckOut from "../hooks/use-check-out";
 import Loading from "components/loading";
 import useNoShow from "../hooks/use-no-show";
 import { router } from "expo-router";
 import formatAddress from "util/format-address";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const Passenger: React.FC<
   PassengerProps & {
@@ -36,7 +36,6 @@ const Passenger: React.FC<
   const checkInMutation = useCheckIn(attendanceId, _id);
   const checkOutMutation = useCheckOut(attendanceId, _id);
   const noShowMutation = useNoShow(attendanceId, _id);
-  const location = useGps();
 
   const handleNoShow = () =>
     Alert.alert(
@@ -48,12 +47,15 @@ const Passenger: React.FC<
         },
         {
           text: "Sim",
-          onPress: () =>
+          onPress: async () => {
+            const { latitude, longitude } = await getGpsCoordinates();
+
             noShowMutation.mutate({
-              latitude: location?.latitude,
-              longitude: location?.longitude,
+              latitude,
+              longitude,
               registrationDate: new Date(),
-            }),
+            });
+          },
         },
       ]
     );

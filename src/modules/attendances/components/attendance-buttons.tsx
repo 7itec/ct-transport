@@ -13,19 +13,20 @@ import { AttendanceProps, AttendanceStatusEnum } from "../types";
 import { createOpenLink } from "react-native-open-maps";
 import ActionButton from "components/action-button";
 import useAcceptAttendance from "../hooks/use-accept-attendance";
-import useGps from "modules/geolocation/hooks/use-gps";
 import useDisplaceAttendance from "../hooks/use-displace-attendance";
 import useArriveAttendance from "../hooks/use-arrive-attendance";
 import useStartAttendance from "../hooks/use-start-attendance";
-import useFinishAttendance from "../hooks/use-finish-attendance";
 import { router } from "expo-router";
 import useFinishAttendanceStop from "../hooks/use-finish-attendance-stop";
 import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import { DriverStatus } from "modules/work-journey/types";
 import QRCodeScanner from "./qr-code-scanner";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
-  const { _id, route, status, tripulation, serviceType } = props;
+  const { _id, route, status } = props;
+  const trackEvent = useLogs();
 
   const [showingQRCodeScanner, showQRCodeScanner] = useState(false);
   const { data } = useCurrentWorkJourney();
@@ -60,8 +61,6 @@ const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
       `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`
     );
   };
-
-  const location = useGps();
   const acceptAttendanceMutation = useAcceptAttendance(_id);
   const displaceAttendanceMutation = useDisplaceAttendance(_id);
   const arriveAttendanceMutation = useArriveAttendance(_id);
@@ -82,12 +81,15 @@ const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
         { text: "Cancelar" },
         {
           text: "Alterar",
-          onPress: () =>
+          onPress: async () => {
+            const { latitude, longitude } = await getGpsCoordinates();
+
             mutate({
               registrationDate: new Date(),
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }),
+              latitude,
+              longitude,
+            });
+          },
         },
       ]
     );
@@ -103,7 +105,10 @@ const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
               label: "Aceitar",
               icon: <Ionicons name="checkmark" color="white" size={18} />,
               backgroundColor: "#2ec4b6",
-              onPress: () => handleAction(acceptAttendanceMutation.mutate),
+              onPress: () => {
+                trackEvent("Attendance - Accetp", { attendanceId: _id });
+                handleAction(acceptAttendanceMutation.mutate);
+              },
               isLoading: acceptAttendanceMutation.isLoading,
             }}
           />
@@ -128,7 +133,10 @@ const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
               label: "Deslocamento",
               icon: <Ionicons name="arrow-redo" color="white" size={18} />,
               backgroundColor: "#4cc9f0",
-              onPress: () => handleAction(displaceAttendanceMutation.mutate),
+              onPress: () => {
+                trackEvent("Attendance - Displacement", { attendanceId: _id });
+                handleAction(displaceAttendanceMutation.mutate);
+              },
               isLoading: displaceAttendanceMutation.isLoading,
             }}
           />
@@ -141,7 +149,10 @@ const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
                 <MaterialIcons name="waving-hand" color="white" size={18} />
               ),
               backgroundColor: "#ff9f1c",
-              onPress: () => handleAction(arriveAttendanceMutation.mutate),
+              onPress: () => {
+                trackEvent("Attendance - Arrival", { attendanceId: _id });
+                handleAction(arriveAttendanceMutation.mutate);
+              },
               isLoading: arriveAttendanceMutation.isLoading,
             }}
           />
@@ -152,7 +163,10 @@ const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
               label: "Em atendimento",
               icon: <FontAwesome6 name="car-side" color="white" size={18} />,
               backgroundColor: "#8d5bc1",
-              onPress: () => handleAction(startAttendanceMutation.mutate),
+              onPress: () => {
+                trackEvent("Attendance - Start", { attendanceId: _id });
+                handleAction(startAttendanceMutation.mutate);
+              },
               isLoading: startAttendanceMutation.isLoading,
             }}
           />

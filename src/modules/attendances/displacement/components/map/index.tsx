@@ -1,5 +1,5 @@
 import Button from "components/button";
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { Dimensions } from "react-native";
 import MapView, { LatLng, Region } from "react-native-maps";
@@ -14,7 +14,8 @@ import mapStyle from "./mapStyle";
 import { useBackHandler } from "@react-native-community/hooks";
 
 import { Container, Marker, MarkerIcon, Shadow, Confirm } from "./styles";
-import useGps from "modules/geolocation/hooks/use-gps";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import Loading from "components/loading";
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MARKER_SIZE = 30;
 
@@ -26,8 +27,19 @@ interface Props {
 
 const Map: React.FC<Props> = ({ coordinates, confirm, close }) => {
   const active = useSharedValue(false);
-  const gpsCoordinates = useGps();
-  const [center, setCenter] = useState(coordinates ?? gpsCoordinates);
+  const [center, setCenter] = useState(coordinates);
+
+  const initMap = async () => {
+    if (coordinates) return;
+
+    const { latitude, longitude } = await getGpsCoordinates();
+
+    setCenter({ latitude, longitude });
+  };
+
+  useEffect(() => {
+    initMap();
+  }, []);
 
   useBackHandler(() => {
     close();
@@ -64,8 +76,10 @@ const Map: React.FC<Props> = ({ coordinates, confirm, close }) => {
   };
 
   const handleConfirm = () => {
-    confirm(center);
+    if (center) confirm(center);
   };
+
+  if (!center) return <Loading />;
 
   return (
     <Container>

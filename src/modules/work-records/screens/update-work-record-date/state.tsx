@@ -3,9 +3,10 @@ import { format } from "date-fns";
 import { ConfirmPasswordRefProps } from "components/confirm-password";
 import useServerConnection from "modules/offline-processor/hooks/use-server-connection";
 import Toast from "react-native-toast-message";
-import useGps from "modules/geolocation/hooks/use-gps";
 import useUpdateWorkRecordDate from "modules/work-records/hooks/use-update-work-record-date";
 import useWorkRecord from "modules/work-records/hooks/use-work-record";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const useUpdateWorkRecordState = (workRecordId: string) => {
   const { data, isLoading } = useWorkRecord(workRecordId);
@@ -14,6 +15,7 @@ const useUpdateWorkRecordState = (workRecordId: string) => {
   const nextDate = data?.nextWorkRecord?.registrationDate;
 
   const [date, setDate] = useState<Date>();
+  const trackEvent = useLogs();
 
   useEffect(() => {
     if (previousDate && !date) setDate(new Date(previousDate));
@@ -24,7 +26,6 @@ const useUpdateWorkRecordState = (workRecordId: string) => {
   const confirmPasswordRef = useRef<ConfirmPasswordRefProps>(null);
 
   const isServerConnection = useServerConnection();
-  const { latitude, longitude } = useGps();
 
   const updateWorkRecordDateMutation = useUpdateWorkRecordDate(workRecordId);
 
@@ -35,7 +36,7 @@ const useUpdateWorkRecordState = (workRecordId: string) => {
     setDate(date);
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (!isServerConnection)
       return Toast.show({
         type: "error",
@@ -50,6 +51,13 @@ const useUpdateWorkRecordState = (workRecordId: string) => {
         text1: "Erro ao alterar registro de trabalho",
         text2: "Data inválida",
       });
+
+    trackEvent("Update Work Record", {
+      workRecordId,
+      newRegistrationDate: date,
+    });
+
+    const { latitude, longitude } = await getGpsCoordinates();
 
     updateWorkRecordDateMutation.mutate({
       newRegistrationDate: date,

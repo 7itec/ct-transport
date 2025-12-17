@@ -7,13 +7,13 @@ import { DriverStatus, WorkStopsEnum } from "../types";
 import useValidateAlert from "modules/alerts/hooks/use-validate-alert";
 import useIsWorkJourneyEndingAlert from "modules/alerts/hooks/use-is-work-journey-ending-alert";
 import useEndWorkJourney from "./use-end-work-journey";
-import useGps from "modules/geolocation/hooks/use-gps";
 import generateId from "util/generate-id";
 import useResumeStop from "./use-resume-stop";
 import useStopAttendance from "modules/attendances/hooks/use-stop-attendance";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const useHandleEndWorkJourney = () => {
-  const location = useGps();
   const workJourneyEndingAlert = useIsWorkJourneyEndingAlert();
 
   const profileQuery = useCurrentWorkJourney();
@@ -23,6 +23,7 @@ const useHandleEndWorkJourney = () => {
   const endWorkJourneyMutation = useEndWorkJourney();
   const validateAlertMutation = useValidateAlert(workJourneyEndingAlert?._id!);
   const stopAttendanceMutation = useStopAttendance();
+  const trackEvent = useLogs();
 
   const { currentWorkJourney, group } = profileQuery?.data ?? {};
   const attendances = attendancesQuery?.data;
@@ -84,13 +85,15 @@ const useHandleEndWorkJourney = () => {
       ].includes(attendance.status)
     );
 
+    const { latitude, longitude } = await getGpsCoordinates();
+
     if (isAttendance)
       await stopAttendanceMutation.mutate({
+        latitude,
+        longitude,
         attendanceId: isAttendance._id,
         stopReason: "Jornada encerrada",
         workStopId: WorkStopsEnum.endWorkJourney,
-        latitude: location?.latitude,
-        longitude: location?.longitude,
         registrationDate: new Date(),
       });
 
@@ -98,15 +101,17 @@ const useHandleEndWorkJourney = () => {
 
     if (isStopped)
       await resumeStopMutation.mutate({
+        latitude,
+        longitude,
         workStopId: currentWorkJourney.lastWorkRecord.payload.workStopId,
         registrationDate: new Date(),
-        latitude: location?.latitude,
-        longitude: location?.longitude,
       });
 
+    trackEvent("End Work Journey");
+
     await endWorkJourneyMutation.mutate({
-      latitude: location?.latitude,
-      longitude: location?.longitude,
+      latitude,
+      longitude,
       registrationDate: new Date(),
       workRecordId: generateId(),
     });

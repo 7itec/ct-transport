@@ -15,7 +15,7 @@ import Row from "components/row";
 import { AttendanceProps } from "../types";
 import useCheckIn from "../hooks/use-check-in";
 import Loading from "components/loading";
-import useGps from "modules/geolocation/hooks/use-gps";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 interface QRCodePassengerProps {
   _id: string;
@@ -33,7 +33,6 @@ const QRCodeScanner: React.FC<Props> = ({ onClose, _id }) => {
   const { top, bottom } = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
   const [facing, setFacing] = useState<CameraType>("front");
-  const location = useGps();
 
   const { mutate, isLoading } = useCheckIn(_id);
 
@@ -96,14 +95,17 @@ const QRCodeScanner: React.FC<Props> = ({ onClose, _id }) => {
                     marginLeft: 15,
                   }}
                   onCameraReady={() => console.log("ready")}
-                  onBarcodeScanned={(code) => {
+                  onBarcodeScanned={async (code) => {
                     try {
                       const passenger: QRCodePassengerProps = JSON.parse(
                         code.data
                       );
+
+                      const { latitude, longitude } = await getGpsCoordinates();
+
                       mutate({
-                        latitude: location?.latitude,
-                        longitude: location?.longitude,
+                        latitude,
+                        longitude,
                         registrationDate: new Date(),
                         passengerId: passenger._id,
                       });

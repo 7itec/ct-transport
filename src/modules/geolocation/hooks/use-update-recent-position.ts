@@ -4,7 +4,6 @@ import BackgroundGeolocation, {
   Location as RNBGLocation,
 } from "react-native-background-geolocation";
 import useApi from "hooks/use-api";
-import dateFnsHelpers from "util/date-fns-helpers";
 
 const useUpdateRecentPosition = () => {
   const { data } = useCurrentWorkJourney();

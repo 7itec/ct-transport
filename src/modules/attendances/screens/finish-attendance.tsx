@@ -19,7 +19,8 @@ import Camera from "modules/checklist/screens/camera";
 import { router, useLocalSearchParams } from "expo-router";
 import useFinishAttendance from "../hooks/use-finish-attendance";
 import useUploadReceipt, { ReceiptTypeEnum } from "../hooks/use-upload-receipt";
-import useGps from "modules/geolocation/hooks/use-gps";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const FinishAttendance: React.FC = () => {
   const { attendanceId } = useLocalSearchParams<{ attendanceId: string }>();
@@ -29,7 +30,7 @@ const FinishAttendance: React.FC = () => {
     useFinishAttendance(attendanceId);
   const finishAttendanceWithCameraMutation = useFinishAttendance(attendanceId);
   const uploadReceiptMutation = useUploadReceipt(attendanceId);
-  const gps = useGps();
+  const trackEvent = useLogs();
 
   const handleOK = async (signature: string) => {
     const path = `${cacheDirectory}/${new Date().getTime()}.png`;
@@ -42,17 +43,33 @@ const FinishAttendance: React.FC = () => {
       }
     );
 
+    trackEvent("Attendance - Finish", {
+      attendanceId,
+      receiptType: ReceiptTypeEnum.DIGITAL_SIGNATURE,
+    });
+
+    const { latitude, longitude } = await getGpsCoordinates();
+
     uploadReceipt(path, ReceiptTypeEnum.DIGITAL_SIGNATURE);
     finishAttendanceWithSignatureMutation.mutate({
-      ...gps,
+      latitude,
+      longitude,
       registrationDate: new Date(),
     });
   };
 
   const handleFinish = async (uri: string) => {
+    trackEvent("Attendance - Finish", {
+      attendanceId,
+      receiptType: ReceiptTypeEnum.RECEIPT_PHOTO,
+    });
+
+    const { latitude, longitude } = await getGpsCoordinates();
+
     uploadReceipt(uri, ReceiptTypeEnum.RECEIPT_PHOTO);
     finishAttendanceWithCameraMutation.mutate({
-      ...gps,
+      latitude,
+      longitude,
       registrationDate: new Date(),
     });
   };

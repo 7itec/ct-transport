@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 
-import { FlatList, ListRenderItemInfo, StatusBar, View } from "react-native";
+import { FlatList, ListRenderItemInfo, View } from "react-native";
 
 import {
   Container,

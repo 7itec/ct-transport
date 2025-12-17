@@ -6,6 +6,7 @@ import useCameraPermission from "modules/permissions/storage/use-camera-permissi
 import useLocationPermission from "modules/permissions/storage/use-location-permission";
 import useNotificationsPermission from "modules/permissions/storage/use-notifications-permission";
 import storage from "util/storage";
+import useLogs from "hooks/use-logs";
 
 const useLogout = () => {
   const { setToken } = useToken();
@@ -15,8 +16,10 @@ const useLogout = () => {
   const { locationPermission } = useLocationPermission();
   const { notificationsPermission } = useNotificationsPermission();
   const [serverConnection] = useStorage("serverConnection");
+  const trackEvent = useLogs();
 
   return () => {
+    trackEvent("Logout");
     endSession();
     setToken(null);
     storage.clearStore();

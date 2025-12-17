@@ -16,7 +16,6 @@ import useConfirmVehicle from "modules/work-journey/hooks/use-confirm-vehicle";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import useVehicleDetails from "modules/checklist/hooks/use-vehicle-details";
 import dateFnsHelpers from "util/date-fns-helpers";
-import useGps from "modules/geolocation/hooks/use-gps";
 import Column from "components/column";
 import Row from "components/row";
 import styled from "styled-components/native";
@@ -26,6 +25,8 @@ import useAttachedVehiclesStorage from "modules/checklist/storage/use-attached-v
 import AttachedVehicle from "./components/attached-vehice";
 import Empty from "components/empty";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import useLogs from "hooks/use-logs";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 export interface AttachmentProps {
   text?: string;
@@ -50,11 +51,11 @@ const VehicleChecklist: React.FC = () => {
   const flatListRef = useRef<FlatList>(null);
   const answerChecklistMutation = useAnswerChecklist();
   const confirmVehicleMutation = useConfirmVehicle();
-  const location = useGps();
   const [showChecklistItems, setShowChecklistItems] = useState(true);
   const { attachedVehicles, setAttachedVehicles } =
     useAttachedVehiclesStorage();
   const { bottom } = useSafeAreaInsets();
+  const trackEvent = useLogs();
 
   const {
     checklistItems,
@@ -185,6 +186,8 @@ const VehicleChecklist: React.FC = () => {
       registrationDate: new Date().toISOString(),
     });
 
+    trackEvent("Checklist Answered", { vehicleId, data });
+
     const isAttachement = data?.type == "ATTACHED";
 
     if (isAttachement) {
@@ -193,9 +196,13 @@ const VehicleChecklist: React.FC = () => {
       return;
     }
 
+    trackEvent("Vehicle Added", { id: vehicleId, plate: data?.plate });
+
+    const { latitude, longitude } = await getGpsCoordinates();
+
     await confirmVehicleMutation.mutate({
-      latitude: location?.latitude,
-      longitude: location?.longitude,
+      latitude,
+      longitude,
       conductorVehicle: vehicleId,
       attachedVehicles: attachedVehicles.map((vehicle) => vehicle._id),
       registrationDate: dateFnsHelpers.addSeconds(new Date(), 2),

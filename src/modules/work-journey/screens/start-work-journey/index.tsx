@@ -13,15 +13,16 @@ import dateFnsHelpers from "util/date-fns-helpers";
 import { router, Stack } from "expo-router";
 import useLogout from "modules/authentication/hooks/use-logout";
 import generateId from "util/generate-id";
-import useGps from "modules/geolocation/hooks/use-gps";
 import useStartWorkJourney from "modules/work-journey/hooks/use-start-work-journey";
 import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import useLogs from "hooks/use-logs";
 import styled from "styled-components/native";
 import Row from "components/row";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
 
 const StartWorkJourney: React.FC = () => {
-  const { trackEvent } = useLogs();
+  const trackEvent = useLogs();
 
   const { data, isLoading, refetch, isRefetching } = useCurrentWorkJourney();
   const startWorkJourneyMutation = useStartWorkJourney();
@@ -30,8 +31,7 @@ const StartWorkJourney: React.FC = () => {
   const lastWorkJourneyEndedAt = data?.lastWorkJourneyEndedAt;
   const nextWorkJourneyMinStartDate = data?.nextWorkJourneyMinStartDate;
   const nonWorkSchedule = data?.nonWorkSchedule;
-
-  const location = useGps();
+  const { bottom } = useSafeAreaInsets();
 
   useEffect(() => {
     if (standBy)
@@ -120,12 +120,14 @@ const StartWorkJourney: React.FC = () => {
           },
           {
             text: "iniciar",
-            onPress: () => {
+            onPress: async () => {
+              const { latitude, longitude } = await getGpsCoordinates();
+
               trackEvent("Start Inter Journey");
               startWorkJourneyMutation.mutate({
                 _id,
-                latitude: location?.latitude,
-                longitude: location?.longitude,
+                latitude,
+                longitude,
                 registrationDate: new Date(),
               });
             },
@@ -142,12 +144,15 @@ const StartWorkJourney: React.FC = () => {
         },
         {
           text: "iniciar",
-          onPress: () => {
+          onPress: async () => {
             trackEvent("Start Work Journey");
+
+            const { latitude, longitude } = await getGpsCoordinates();
+
             startWorkJourneyMutation.mutate({
               _id,
-              latitude: location?.latitude,
-              longitude: location?.longitude,
+              latitude,
+              longitude,
               registrationDate: new Date(),
             });
           },
@@ -212,7 +217,7 @@ const StartWorkJourney: React.FC = () => {
           />
         </Content>
       </Container>
-      <Pressable onPress={logout}>
+      <Pressable onPress={logout} style={{ marginBottom: bottom + 15 }}>
         <Exit>Sair</Exit>
       </Pressable>
       <Stack.Screen options={{ headerShown: false }} />

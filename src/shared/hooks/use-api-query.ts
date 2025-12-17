@@ -4,6 +4,7 @@ import decodeError from "util/decode-error";
 import { useMMKVStorage } from "react-native-mmkv-storage";
 import { useCallback, useEffect, useState } from "react";
 import storage from "util/storage";
+import useLogs from "./use-logs";
 
 interface Props {
   url: string;
@@ -24,6 +25,7 @@ const useApiQuery = <T = any>({
 }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
+  const trackEvent = useLogs();
 
   const getQueryKey = () => {
     if (params) return queryKey ?? [url, params];
@@ -44,6 +46,9 @@ const useApiQuery = <T = any>({
         url,
         params,
       });
+
+      if (url === "/users/me")
+        trackEvent("Refresh User Data", { data: response.data.data });
 
       return setData(response.data.data);
     } catch (error) {

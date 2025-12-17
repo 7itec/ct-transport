@@ -20,6 +20,7 @@ import Expanded from "components/expanded";
 import Column from "components/column";
 import useLogout from "../hooks/use-logout";
 import { router } from "expo-router";
+import useLogs from "hooks/use-logs";
 
 const RenewSession: React.FC = () => {
   const passwordInputRef = useRef<TextInput>(null);
@@ -32,6 +33,7 @@ const RenewSession: React.FC = () => {
 
   const { data } = useCurrentWorkJourney();
   const logout = useLogout();
+  const trackEvent = useLogs();
 
   function requestAccess() {
     biometrics
@@ -43,6 +45,7 @@ const RenewSession: React.FC = () => {
         const { success } = resultObject;
 
         if (success) {
+          trackEvent("Renew Session", { renewType: "Biometrics" });
           startSession();
           router.replace("/");
         }
@@ -66,6 +69,7 @@ const RenewSession: React.FC = () => {
         text1: "Erro no login",
         text2: "Senha inválida",
       });
+    trackEvent("Renew Session", { renewType: "Password" });
     startSession();
     router.replace("/");
   };
