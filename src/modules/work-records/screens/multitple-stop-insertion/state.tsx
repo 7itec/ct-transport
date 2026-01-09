@@ -5,11 +5,12 @@ import useServerConnection from "modules/offline-processor/hooks/use-server-conn
 import useMultipleStopInsertion from "modules/work-records/hooks/use-multiple-stop-insertion";
 import useAlert from "modules/alerts/hooks/use-alert";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const useMultipleStopInsertionState = (alertId: string) => {
   const { data, isLoading } = useAlert(alertId);
   const confirmPasswordRef = useRef<ConfirmPasswordRefProps>(null);
+  const { latitude, longitude } = useGps();
 
   const trackEvent = useLogs();
 
@@ -30,8 +31,6 @@ const useMultipleStopInsertionState = (alertId: string) => {
     trackEvent("Multiple Stop Insertion", {
       alertId,
     });
-
-    const { latitude, longitude } = await getGpsCoordinates();
 
     multipleStopInsertionMutation.mutate({
       latitude,

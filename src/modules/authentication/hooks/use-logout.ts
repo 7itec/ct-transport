@@ -1,7 +1,5 @@
 import useToken from "../storage/use-token";
 import useSession from "../storage/use-session";
-import useStorage from "hooks/use-storage";
-import useStorageManager from "hooks/use-storage-manager";
 import useCameraPermission from "modules/permissions/storage/use-camera-permission";
 import useLocationPermission from "modules/permissions/storage/use-location-permission";
 import useNotificationsPermission from "modules/permissions/storage/use-notifications-permission";
@@ -11,24 +9,34 @@ import useLogs from "hooks/use-logs";
 const useLogout = () => {
   const { setToken } = useToken();
   const { endSession } = useSession();
-  const { setStorage } = useStorageManager();
-  const { cameraPermission } = useCameraPermission();
-  const { locationPermission } = useLocationPermission();
-  const { notificationsPermission } = useNotificationsPermission();
-  const [serverConnection] = useStorage("serverConnection");
+  const { cameraPermission, setCameraPermission } = useCameraPermission();
+  const { locationPermission, setLocationPermission } = useLocationPermission();
+  const { notificationsPermission, setNotificationsPermission } =
+    useNotificationsPermission();
   const trackEvent = useLogs();
 
-  return () => {
+  return async () => {
+    const keys = await storage.indexer.getKeys();
+
+    const keysToRemove = keys.filter(
+      (key) =>
+        ![
+          "cameraPermission",
+          "locationPermission",
+          "notificationsPermission",
+          "arrayIndex",
+          "stringIndex",
+          "boolIndex",
+          "mapIndex",
+          "default",
+        ].includes(key)
+    );
+
+    setToken(null);
+    storage.removeItems(keysToRemove);
+
     trackEvent("Logout");
     endSession();
-    setToken(null);
-    storage.clearStore();
-    setStorage({
-      cameraPermission,
-      locationPermission,
-      notificationsPermission,
-      serverConnection,
-    });
   };
 };
 

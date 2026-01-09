@@ -1,25 +1,12 @@
-import { useEffect } from "react";
-import useStorageManager from "./use-storage-manager";
+import { useMMKVStorage } from "react-native-mmkv-storage";
+import storage from "util/storage";
 
-type StorageReturnType<T = any> = [T, (value: T) => void];
-
-const useStorage = <T = any>(key: string, defaultValue?: T) => {
-  const { setStorage, ...store } = useStorageManager();
-  const storage = store.storage ?? {};
-
-  useEffect(() => {
-    if (defaultValue && !storage[key])
-      setStorage((previousValue: T) => ({
-        ...previousValue,
-        [key]: defaultValue,
-      }));
-  }, []);
-
-  return [
-    storage[key],
-    (value) =>
-      setStorage((previousValue: T) => ({ ...previousValue, [key]: value })),
-  ] as StorageReturnType<T>;
+const useStorage = <T = any>(key: any, defaultValue?: T) => {
+  return useMMKVStorage<T>(
+    typeof key === "string" ? key : JSON.stringify(key),
+    storage,
+    defaultValue
+  );
 };
 
 export default useStorage;

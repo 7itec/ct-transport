@@ -26,10 +26,12 @@ import { colors } from "assets/colors";
 import { FontAwesome } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import Loading from "components/loading";
+import useConductorVehicleStorage from "modules/checklist/storage/use-conductor-vehicle-storage";
 
 const Attendances: React.FC = () => {
   const { data, refetch, isRefetching } = useCurrentWorkJourney();
   const attendancesQuery = useAttendances();
+  const { conductorVehicle } = useConductorVehicleStorage();
   const attendances = data?.currentWorkJourney?.conductorVehicle
     ? attendancesQuery?.data ?? []
     : [];
@@ -49,7 +51,7 @@ const Attendances: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       if (conductorVehicleId) attendancesQuery.fetch();
-    }, [conductorVehicleId])
+    }, [conductorVehicleId, attendancesQuery.fetch])
   );
 
   // const checkAlertPendingIssues = useCallback(() => {
@@ -166,8 +168,18 @@ const Attendances: React.FC = () => {
               !data?.currentWorkJourney?.conductorVehicle && (
                 <Button
                   fitContent={false}
-                  label="Selecionar veículo"
-                  onPress={() => router.push("/checklists/select-vehicle")}
+                  label={
+                    conductorVehicle?.canBeAttached
+                      ? "Meus veículos"
+                      : "Selecionar veículo"
+                  }
+                  onPress={() =>
+                    router.push(
+                      conductorVehicle?.canBeAttached
+                        ? "/checklists/vehicles-draft"
+                        : "/checklists/select-vehicle"
+                    )
+                  }
                 />
               )}
             {!attendancesQuery.isLoading &&
@@ -206,7 +218,7 @@ const Attendances: React.FC = () => {
                   </MediumText>
                 </Column>
               </Row>
-              {attachedVehicles?.length && (
+              {attachedVehicles?.length! > 0 && (
                 <>
                   <View
                     style={{

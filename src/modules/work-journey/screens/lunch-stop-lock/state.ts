@@ -1,9 +1,9 @@
 import { useBackHandler } from "@react-native-community/hooks";
 import { router } from "expo-router";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 import useCancelStop from "modules/work-journey/hooks/use-cancel-stop";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import useResumeStop from "modules/work-journey/hooks/use-resume-stop";
 import { DriverStatus, WorkStopsEnum } from "modules/work-journey/types";
 import { useEffect } from "react";
@@ -13,16 +13,17 @@ import dateFnsHelpers from "util/date-fns-helpers";
 import generateId from "util/generate-id";
 
 const useLunchStopLockState = () => {
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
 
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
   const workStopId =
-    data?.currentWorkJourney?.lastWorkRecord?.payload?.workStopId;
+    profile?.currentWorkJourney?.lastWorkRecord?.payload?.workStopId;
   const canCancel = () =>
-    data?.currentWorkJourney?.lastWorkRecord?.registrationDate &&
+    profile?.currentWorkJourney?.lastWorkRecord?.registrationDate &&
     dateFnsHelpers.differenceInSecondsFromNow(
-      data?.currentWorkJourney.lastWorkRecord?.registrationDate
+      profile?.currentWorkJourney.lastWorkRecord?.registrationDate
     ) <
       60 * 5;
 
@@ -38,25 +39,25 @@ const useLunchStopLockState = () => {
   }, []);
 
   useEffect(() => {
-    if (data?.currentWorkJourney?.driverStatus !== DriverStatus.STOPPED)
+    if (profile?.currentWorkJourney?.driverStatus !== DriverStatus.STOPPED)
       router.replace("/");
-  }, [data?.currentWorkJourney]);
+  }, [profile?.currentWorkJourney]);
 
   const handleResumeDriverStop = () => {
-    if (!data?.currentWorkJourney) return;
+    if (!profile?.currentWorkJourney) return;
 
     trackEvent("Finish Stop", {
       workStopName: "Horário de alimentação",
       workStopId: WorkStopsEnum.meal,
     });
 
-    const lunchStops = data?.currentWorkJourney.stopCounts.lunch;
+    const lunchStops = profile?.currentWorkJourney.stopCounts.lunch;
 
     if (
       workStopId === WorkStopsEnum.meal &&
       lunchStops === 0 &&
       dateFnsHelpers.differenceInMinutesFromNow(
-        data?.currentWorkJourney.lastWorkRecord?.registrationDate
+        profile?.currentWorkJourney.lastWorkRecord?.registrationDate
       ) < 30
     )
       return Toast.show({
@@ -76,16 +77,18 @@ const useLunchStopLockState = () => {
         {
           text: "Confirmar",
           onPress: async () => {
-            const { latitude, longitude } = await getGpsCoordinates();
-
             resumeStopMutation.mutate({
               latitude,
               longitude,
               workStopId:
-                data?.currentWorkJourney?.lastWorkRecord?.payload?.workStopId,
+                profile?.currentWorkJourney?.lastWorkRecord?.payload
+                  ?.workStopId,
               registrationDate: new Date(),
               id: generateId(),
             });
+
+            router.dismissAll();
+            router.replace("/");
           },
         },
       ]
@@ -108,8 +111,6 @@ const useLunchStopLockState = () => {
       {
         text: "Confirmar",
         onPress: async () => {
-          const { latitude, longitude } = await getGpsCoordinates();
-
           cancelStopMutation.mutate({
             latitude,
             longitude,
@@ -127,7 +128,7 @@ const useLunchStopLockState = () => {
     handleCancelStop,
     canCancel,
     registrationDate:
-      data?.currentWorkJourney?.lastWorkRecord.registrationDate!,
+      profile?.currentWorkJourney?.lastWorkRecord.registrationDate!,
   };
 };
 

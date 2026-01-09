@@ -10,12 +10,12 @@ import generateId from "util/generate-id";
 import useStop from "../hooks/use-stop";
 import useCreateAlert from "modules/alerts/hooks/use-create-alert";
 import { ProtocolNamesEnum } from "modules/alerts/types";
-import useCurrentWorkJourney from "../hooks/use-current-work-journey";
 import { router } from "expo-router";
 import useSkipLuncthTimeUntil from "modules/taks/storage/use-skip-lunch-time-until";
 import dateFnsHelpers from "util/date-fns-helpers";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const LunchTimeNeeded: React.FC = () => {
   useBackHandler(() => {
@@ -24,13 +24,12 @@ const LunchTimeNeeded: React.FC = () => {
 
   const stopMutation = useStop();
   const createAlertMutation = useCreateAlert();
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const { setSkipLunchTimeUntil } = useSkipLuncthTimeUntil();
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
   const handleLunchStop = useCallback(async () => {
-    const { latitude, longitude } = await getGpsCoordinates();
-
     const data = {
       latitude,
       longitude,
@@ -51,17 +50,15 @@ const LunchTimeNeeded: React.FC = () => {
   }, []);
 
   const handleStopLater = useCallback(async () => {
-    const { latitude, longitude } = await getGpsCoordinates();
-
     await createAlertMutation.mutate({
       protocolName: ProtocolNamesEnum.RECUSA_PARADA_ALMOÇO_6H,
       registrationDate: new Date(),
       payload: {
         latitude,
         longitude,
-        driverName: data?.driverName,
-        driverId: data?.driverId,
-        vehicleId: data?.currentWorkJourney?.conductorVehicle?._id,
+        driverName: profile?.driverName,
+        driverId: profile?.driverId,
+        vehicleId: profile?.currentWorkJourney?.conductorVehicle?._id,
       },
     });
 
@@ -74,7 +71,7 @@ const LunchTimeNeeded: React.FC = () => {
 
     router.dismiss();
     router.replace("/");
-  }, [data]);
+  }, [profile]);
 
   useEffect(() => {
     trackEvent("Lunch Time Needed");

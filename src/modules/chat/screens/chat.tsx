@@ -5,19 +5,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import Loading from "components/loading";
 import { MessageProps } from "modules/chat/types";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import ChatBubble from "modules/chat/components/chat-bubble";
 import ChatTextInput from "../components/chat-text-input";
 import { FlatList } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "react-native";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const Chat: React.FC = () => {
   const { token } = useToken();
   const { attendanceId } = useLocalSearchParams<{ attendanceId: string }>();
   const { bottom } = useSafeAreaInsets();
   const [messages, setMessages] = useState<MessageProps[]>();
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const scrollViewRef = useRef<FlatList>(null);
 
   const chatSocket = useMemo<Socket>(() => {
@@ -46,8 +46,8 @@ const Chat: React.FC = () => {
         message,
         sentAt: new Date(),
         user: {
-          name: data?.driverName!,
-          externalId: data?._id!,
+          name: profile?.driverName!,
+          externalId: profile?._id!,
         },
       };
 
@@ -66,8 +66,8 @@ const Chat: React.FC = () => {
     () =>
       chatSocket.emit("joinRoom", {
         roomName: attendanceId,
-        username: data?.driverName,
-        externalId: data?._id,
+        username: profile?.driverName,
+        externalId: profile?._id,
       }),
     []
   );
@@ -78,7 +78,7 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     const onMessage = (message: MessageProps) => {
-      if (message?.user?.externalId === data?._id) return;
+      if (message?.user?.externalId === profile?._id) return;
       if (typeof message === "object") {
         setMessages((prev) => [...(prev ?? []), message]);
       }
@@ -91,7 +91,7 @@ const Chat: React.FC = () => {
       chatSocket.off("message", onMessage);
       chatSocket.disconnect();
     };
-  }, [chatSocket, data?._id]);
+  }, [chatSocket, profile?._id]);
 
   return (
     <View style={{ flex: 1, paddingBottom: bottom }}>

@@ -3,7 +3,7 @@ import Toast from "react-native-toast-message";
 import decodeError from "util/decode-error";
 import { useState } from "react";
 import useOfflineRequests from "modules/offline-processor/hooks/use-offline-requests";
-import useStorage from "./use-storage";
+import useServerConnection from "modules/offline-processor/hooks/use-server-connection";
 
 interface Props {
   url: ((data: any) => string) | string;
@@ -31,7 +31,7 @@ const useApiMutation = <T = any>({
   const api = useApi();
   const [isLoading, setIsLoading] = useState(false);
   const { createOfflineRequest, pendingRequests } = useOfflineRequests();
-  const isServerConnection = useStorage("serverConnection");
+  const isServerConnection = useServerConnection();
 
   const handleOnSuccess = (response?: any, data?: T) => {
     if (onSuccess) onSuccess(response, data);

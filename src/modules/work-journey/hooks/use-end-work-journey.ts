@@ -5,14 +5,26 @@ import { router } from "expo-router";
 import { Alert } from "react-native";
 import dateFnsHelpers from "util/date-fns-helpers";
 import usersKeys from "modules/users/util/users-keys";
+import useConductorVehicleStorage from "modules/checklist/storage/use-conductor-vehicle-storage";
+import useAttachedVehiclesStorage from "modules/checklist/storage/use-attached-vehicles-storage";
 
 const useEndWorkJourney = () => {
   const { data: profile, setData } = useQueryHelpers<UserProps>(
     usersKeys.profile()
   );
+  const { conductorVehicle, setConductorVehicle } =
+    useConductorVehicleStorage();
+  const { setAttachedVehicles } = useAttachedVehiclesStorage();
 
   const onSuccess = () => {
     if (!profile) return;
+
+    if (conductorVehicle)
+      setConductorVehicle({ ...conductorVehicle, canSkipChecklist: false });
+
+    setAttachedVehicles((vehicles) =>
+      vehicles.map((vehicle) => ({ ...vehicle, canSkipChecklist: false }))
+    );
 
     profile.lastWorkJourneyEndedAt = new Date();
 

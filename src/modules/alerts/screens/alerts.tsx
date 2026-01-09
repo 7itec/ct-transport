@@ -1,10 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import useAlerts from "../hooks/use-alerts";
 import Loading from "components/loading";
 import Alert from "../components/alert";
 import { FlatList, RefreshControl, View } from "react-native";
 import { RegularText } from "components/text";
-import { useFocusEffect } from "expo-router";
 
 const Alerts: React.FC = () => {
   const { data = [], isLoading, refetch } = useAlerts();
@@ -15,12 +14,6 @@ const Alerts: React.FC = () => {
     await refetch();
     setRefreshing(false);
   };
-
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [])
-  );
 
   if (isLoading) return <Loading />;
 

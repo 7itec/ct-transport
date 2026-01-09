@@ -14,7 +14,7 @@ import Loading from "components/loading";
 import useNoShow from "../hooks/use-no-show";
 import { router } from "expo-router";
 import formatAddress from "util/format-address";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const Passenger: React.FC<
   PassengerProps & {
@@ -36,6 +36,7 @@ const Passenger: React.FC<
   const checkInMutation = useCheckIn(attendanceId, _id);
   const checkOutMutation = useCheckOut(attendanceId, _id);
   const noShowMutation = useNoShow(attendanceId, _id);
+  const { latitude, longitude } = useGps();
 
   const handleNoShow = () =>
     Alert.alert(
@@ -48,8 +49,6 @@ const Passenger: React.FC<
         {
           text: "Sim",
           onPress: async () => {
-            const { latitude, longitude } = await getGpsCoordinates();
-
             noShowMutation.mutate({
               latitude,
               longitude,
@@ -73,8 +72,8 @@ const Passenger: React.FC<
             text: "Sim",
             onPress: () =>
               checkInMutation.mutate({
-                latitude: location?.latitude,
-                longitude: location?.longitude,
+                latitude,
+                longitude,
                 registrationDate: new Date(),
               }),
           },
@@ -96,8 +95,8 @@ const Passenger: React.FC<
             text: "Sim",
             onPress: () =>
               checkOutMutation.mutate({
-                latitude: location?.latitude,
-                longitude: location?.longitude,
+                latitude: latitude,
+                longitude: longitude,
                 registrationDate: new Date(),
               }),
           },

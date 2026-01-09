@@ -1,12 +1,13 @@
-import {atom, useAtom} from 'jotai';
-import {VehicleProps} from '../types';
-
-const attachedVehiclesAtom = atom<VehicleProps[]>([]);
+import { VehicleProps } from "../types";
+import useStorage from "hooks/use-storage";
 
 const useAttachedVehiclesStorage = () => {
-  const [attachedVehicles, setAttachedVehicles] = useAtom(attachedVehiclesAtom);
+  const [attachedVehicles, setAttachedVehicles] = useStorage<VehicleProps[]>(
+    "attachedVehicles",
+    []
+  );
 
-  return {attachedVehicles, setAttachedVehicles};
+  return { attachedVehicles, setAttachedVehicles };
 };
 
 export default useAttachedVehiclesStorage;

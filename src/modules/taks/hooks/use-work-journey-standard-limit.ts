@@ -1,15 +1,15 @@
 import { router } from "expo-router";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 import { useCallback } from "react";
 import dateFnsHelpers from "util/date-fns-helpers";
 
 const useWorkJourneyStandardLimit = () => {
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
 
   const resolve = useCallback(() => {
-    if (!data) return false;
+    if (!profile) return false;
 
-    const { companyConfigParameters, currentWorkJourney } = data;
+    const { companyConfigParameters, currentWorkJourney } = profile;
 
     if (!currentWorkJourney || currentWorkJourney.hasLimitReachedAlert)
       return false;
@@ -28,7 +28,7 @@ const useWorkJourneyStandardLimit = () => {
     router.push("/work-journey/standard-limit");
 
     return true;
-  }, [data]);
+  }, [profile]);
 
   return resolve;
 };

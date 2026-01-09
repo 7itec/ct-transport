@@ -1,15 +1,14 @@
 import { FlexAlignType } from "react-native";
-import { isAndroid } from "util/metrics";
 import { MessageProps } from "modules/chat/types";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import dateFnsHelpers from "util/date-fns-helpers";
 import styled from "styled-components/native";
 import { deviceWidth } from "util/metrics";
 import { LightText, MediumText, RegularText } from "components/text";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const ChatBubble: React.FC<MessageProps> = ({ user, message, sentAt }) => {
-  const { data } = useCurrentWorkJourney();
-  const isMe = data?._id === user?.externalId;
+  const { profile } = useProfileStorage();
+  const isMe = profile?._id === user?.externalId;
   const isSystemMessage = user?.name === "system";
 
   const characteristics = (): {

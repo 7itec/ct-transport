@@ -1,12 +1,6 @@
 import React, { useCallback } from "react";
 
-import {
-  router,
-  Stack,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { BoldText, RegularText } from "components/text";
 import styled from "styled-components/native";
 import Row from "components/row";
@@ -24,17 +18,10 @@ import { StatusBar } from "expo-status-bar";
 
 const NextAttendances: React.FC = () => {
   const { vehicleId } = useLocalSearchParams<{ vehicleId: string }>();
-  const { data, refetch, isRefetching } = useCurrentWorkJourney();
+
   const attendancesQuery = useAttendances(vehicleId);
-  useFocusEffect(
-    useCallback(() => {
-      if (data?.currentWorkJourney?.conductorVehicle)
-        attendancesQuery.refetch();
-    }, [data?.currentWorkJourney?.conductorVehicle])
-  );
 
   const onRefresh = async () => {
-    refetch();
     attendancesQuery.refetch();
   };
 
@@ -103,7 +90,7 @@ const NextAttendances: React.FC = () => {
         refreshControl={
           <RefreshControl
             {...{
-              refreshing: attendancesQuery.isRefetching || isRefetching,
+              refreshing: attendancesQuery.isRefetching,
               onRefresh,
             }}
           />

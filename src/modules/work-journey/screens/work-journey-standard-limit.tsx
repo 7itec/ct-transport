@@ -7,7 +7,6 @@ import Column from "components/column";
 import { useBackHandler } from "@react-native-community/hooks";
 import { router } from "expo-router";
 import useSkipUninformedStopUntil from "modules/taks/storage/use-skip-uninformed-stop-until";
-import useCurrentWorkJourney from "../hooks/use-current-work-journey";
 import { Alert } from "react-native";
 import useHandleEndWorkJourney from "modules/work-journey/hooks/use-handle-end-work-journey";
 import useCreateAlert from "modules/alerts/hooks/use-create-alert";
@@ -16,13 +15,14 @@ import useQueryHelpers from "hooks/use-query-helpers";
 import { UserProps } from "../types";
 import usersKeys from "modules/users/util/users-keys";
 import useLogs from "hooks/use-logs";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const WorkJourneyStandardLimit: React.FC = () => {
   useBackHandler(() => {
     return true;
   }, []);
 
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const { setData } = useQueryHelpers<UserProps>(usersKeys.profile());
 
   const { setSkipUninformedStopUntil } = useSkipUninformedStopUntil();
@@ -54,24 +54,24 @@ const WorkJourneyStandardLimit: React.FC = () => {
     await createAlertMutation.mutate({
       protocolName: ProtocolNamesEnum.LIMITE_JORNADA,
       registrationDate: new Date(),
-      recipientIds: [data?._id],
+      recipientIds: [profile?._id],
       payload: {
-        driverName: data?.driverName,
-        driverId: data?.driverId,
-        vehicleId: data?.currentWorkJourney?.conductorVehicle?._id,
+        driverName: profile?.driverName,
+        driverId: profile?.driverId,
+        vehicleId: profile?.currentWorkJourney?.conductorVehicle?._id,
       },
     });
 
     trackEvent("Standard Limit Ignored", {
-      companyConfigParameters: data?.companyConfigParameters,
+      companyConfigParameters: profile?.companyConfigParameters,
     });
 
-    if (!data?.currentWorkJourney) return;
+    if (!profile?.currentWorkJourney) return;
 
-    setData({
-      ...data,
+    setprofile({
+      ...profile,
       currentWorkJourney: {
-        ...data.currentWorkJourney,
+        ...profile.currentWorkJourney,
         hasLimitReachedAlert: true,
       },
     });
@@ -87,8 +87,8 @@ const WorkJourneyStandardLimit: React.FC = () => {
         <Title>Limite de jornada de trabalho</Title>
         <Description>
           Limite de{" "}
-          {data?.companyConfigParameters?.standardWorkJourneyTime?.textPtBr} da
-          jornada de trabalho alcançado, por favor encerre ou ignore o
+          {profile?.companyConfigParameters?.standardWorkJourneyTime?.textPtBr}{" "}
+          da jornada de trabalho alcançado, por favor encerre ou ignore o
           encerramento da jornada
         </Description>
         <Column gap={10} style={{ width: "100%" }}>

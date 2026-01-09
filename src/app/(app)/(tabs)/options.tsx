@@ -14,22 +14,23 @@ import useSession from "modules/authentication/storage/use-session";
 import useHandleEndWorkJourney from "modules/work-journey/hooks/use-handle-end-work-journey";
 import useRemoveVehicle from "modules/work-journey/hooks/use-remove-vehicle";
 import { Alert } from "react-native";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import { DriverStatus } from "modules/work-journey/types";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const Options: React.FC = () => {
   const { endSession } = useSession();
   const removeVehicleMutation = useRemoveVehicle();
-  const profileQuery = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
+
+  const { latitude, longitude } = useGps();
 
   const trackEvent = useLogs();
 
   const { handleEndWorkDay, isLoading } = useHandleEndWorkJourney();
 
-  const conductorVehicle =
-    profileQuery.data?.currentWorkJourney?.conductorVehicle;
+  const conductorVehicle = profile?.currentWorkJourney?.conductorVehicle;
 
   const handleRemoveVehicle = () => {
     Alert.alert("Remover veículo", "Deseja realmente remover o veículo?", [
@@ -38,8 +39,6 @@ const Options: React.FC = () => {
         text: "Sim",
         onPress: async () => {
           trackEvent("Vehicles Released");
-
-          const { latitude, longitude } = await getGpsCoordinates();
 
           removeVehicleMutation.mutate({
             latitude,
@@ -73,17 +72,16 @@ const Options: React.FC = () => {
       {conductorVehicle && (
         <Option
           {...{
-            name: "Liberar veículo",
+            name: "Liberar veículos",
             icon: <FontAwesome5 name="car" size={18} color={colors.white} />,
             onPress: handleRemoveVehicle,
             description:
-              "Libere o veículo para que outra pessoa possa utilizar",
+              "Libere os veículos para que outra pessoa possa utilizar",
             isLoading: removeVehicleMutation.isLoading,
           }}
         />
       )}
-      {profileQuery.data?.currentWorkJourney?.driverStatus !==
-        DriverStatus.STOPPED && (
+      {profile?.currentWorkJourney?.driverStatus !== DriverStatus.STOPPED && (
         <Option
           {...{
             name: "Realizar parada",
@@ -121,7 +119,7 @@ const Options: React.FC = () => {
           description: "Visualizar e alterar dados da conta",
         }}
       />
-      {profileQuery.data?.activeSecurityCampaign && (
+      {profile?.activeSecurityCampaign && (
         <Option
           {...{
             name: "Briefing de Segurança",

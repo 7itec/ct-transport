@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import { colors } from "assets/colors";
 import Button from "components/button";
 import Column from "components/column";
+import { Portal } from "@gorhom/portal";
 
 interface Props {
   onClose: () => void;
@@ -22,31 +23,35 @@ const ReproveText: React.FC<Props> = ({ onClose, onConfirm }) => {
   };
 
   return (
-    <Container>
-      <StatusBar
-        backgroundColor={colors.primary}
-        translucent={false}
-        style="light"
-      />
-      <BackButton onPress={onClose}>
-        <Ionicons name="close" size={30} />
-      </BackButton>
-      <Column gap={10}>
-        <Column>
-          <SemilBoldText size="extra-large">Motivo de reprovação</SemilBoldText>
-          <RegularText>Informe o motivo para reprovar o item</RegularText>
+    <Portal>
+      <Container>
+        <StatusBar
+          backgroundColor={colors.primary}
+          translucent={false}
+          style="light"
+        />
+        <BackButton onPress={onClose}>
+          <Ionicons name="close" size={30} />
+        </BackButton>
+        <Column gap={10}>
+          <Column>
+            <SemilBoldText size="extra-large">
+              Motivo de reprovação
+            </SemilBoldText>
+            <RegularText>Informe o motivo para reprovar o item</RegularText>
+          </Column>
+          <Column gap={30}>
+            <TextInput
+              autoFocus
+              multiline
+              placeholder="Motivo de reprovação"
+              onChangeText={setText}
+            />
+            <Button label="Salvar" onPress={handleSubmit} />
+          </Column>
         </Column>
-        <Column gap={30}>
-          <TextInput
-            autoFocus
-            multiline
-            placeholder="Motivo de reprovação"
-            onChangeText={setText}
-          />
-          <Button label="Salvar" onPress={handleSubmit} />
-        </Column>
-      </Column>
-    </Container>
+      </Container>
+    </Portal>
   );
 };
 

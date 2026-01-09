@@ -11,6 +11,7 @@ interface Props extends PressableProps {
 }
 
 const Column: React.FC<Props> = ({ children, ...props }) => {
+  if (typeof children === "string") console.log("TESTE", children);
   if (!props.onPress)
     return <ViewContainer {...props}>{children}</ViewContainer>;
   return <PressableContainer {...props}>{children}</PressableContainer>;

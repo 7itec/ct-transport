@@ -5,7 +5,6 @@ import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
-import useStorageManager from "hooks/use-storage-manager";
 import Toast, { ErrorToast, SuccessToast } from "react-native-toast-message";
 import { colors } from "assets/colors";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -14,15 +13,11 @@ import { useEffect } from "react";
 import { Linking } from "react-native";
 import OfflineInfo from "modules/offline-processor/components/offline-info";
 import useServerConnection from "modules/offline-processor/hooks/use-server-connection";
-import * as SplashScreen from "expo-splash-screen";
 import { notificationEmitter } from "util/notification-emitter";
 import ErrorBoundary from "react-native-error-boundary";
 import ErrorHandler from "components/error-handler";
 
-SplashScreen.preventAutoHideAsync();
-
 export default function RootLayout() {
-  const { storage } = useStorageManager();
   const isServerConnection = useServerConnection();
 
   const router = useRouter();
@@ -44,12 +39,6 @@ export default function RootLayout() {
       notificationEmitter.removeAllListeners("url");
     };
   }, []);
-
-  useEffect(() => {
-    if (storage) SplashScreen.hide();
-  }, [storage]);
-
-  if (!storage) return null;
 
   return (
     <ErrorBoundary FallbackComponent={ErrorHandler}>

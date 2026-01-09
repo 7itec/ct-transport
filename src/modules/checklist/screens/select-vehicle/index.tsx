@@ -14,6 +14,10 @@ import Loading from "components/loading";
 import useCheckVehicleAvailability from "modules/checklist/hooks/use-check-vehicle-availability";
 import useAttachedVehicles from "modules/checklist/hooks/use-attached-vehicles";
 import useAttachedVehiclesStorage from "modules/checklist/storage/use-attached-vehicles-storage";
+import useGps from "modules/geolocation/hooks/use-gps";
+import dateFnsHelpers from "util/date-fns-helpers";
+import useConfirmVehicle from "modules/work-journey/hooks/use-confirm-vehicle";
+import useConductorVehicleStorage from "modules/checklist/storage/use-conductor-vehicle-storage";
 
 const SelectVehicle: React.FC = () => {
   const [search, setSearch] = useState("");
@@ -21,12 +25,16 @@ const SelectVehicle: React.FC = () => {
   const { type = "CONDUCTOR" } = useLocalSearchParams<{
     type: VehicleProps["type"];
   }>();
+  const { latitude, longitude } = useGps();
 
   const conductorVehiclesQuery = useConductorVehicles();
   const attachedVehiclesQuery = useAttachedVehicles();
-
   const checkVehicleAvailability = useCheckVehicleAvailability(type);
+
   const { setAttachedVehicles } = useAttachedVehiclesStorage();
+  const { setConductorVehicle } = useConductorVehicleStorage();
+
+  const confirmVehicleMutation = useConfirmVehicle();
 
   const vehiclesQuery =
     type === "CONDUCTOR" ? conductorVehiclesQuery : attachedVehiclesQuery;
@@ -48,21 +56,42 @@ const SelectVehicle: React.FC = () => {
 
   const handleVehiclePress = useCallback(async (vehicleId: string) => {
     setVehicleId(vehicleId);
-    const { vehicle, canSkipChecklist } = await checkVehicleAvailability.mutate(
-      vehicleId
-    );
+    const {
+      vehicle,
+      canSkipChecklist,
+    }: { vehicle: VehicleProps; canSkipChecklist: boolean } =
+      await checkVehicleAvailability.mutate(vehicleId);
+
+    vehicle.canSkipChecklist = canSkipChecklist;
+
     setVehicleId(undefined);
 
     if (!vehicle) return;
 
-    if (canSkipChecklist) {
-      return setAttachedVehicles((prev) => [...prev, vehicle]);
+    if (!canSkipChecklist)
+      return router.replace({
+        pathname: "/checklists/vehicle-checklist",
+        params: { vehicleId: vehicle._id },
+      });
+
+    const isConductor = vehicle.type === "CONDUCTOR";
+
+    if (isConductor && !vehicle.canBeAttached) {
+      await confirmVehicleMutation.mutate({
+        latitude,
+        longitude,
+        conductorVehicle: vehicle._id,
+        attachedVehicles: [],
+        registrationDate: dateFnsHelpers.addSeconds(new Date(), 2),
+        vehicle: vehicle,
+      });
     }
 
-    router.push({
-      pathname: "/checklists/vehicle-checklist",
-      params: { vehicleId: vehicle._id },
-    });
+    if (isConductor) setConductorVehicle(vehicle);
+    else setAttachedVehicles((vehicles) => [...vehicles, vehicle]);
+
+    if (isConductor) router.replace("/checklists/vehicles-draft");
+    else router.back();
   }, []);
 
   const renderItem = useCallback(

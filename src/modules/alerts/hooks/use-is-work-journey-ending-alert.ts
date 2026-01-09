@@ -1,10 +1,11 @@
-import { ProtocolNamesEnum } from "../types";
-import useAlerts from "./use-alerts";
+import useStorage from "hooks/use-storage";
+import { AlertProps, ProtocolNamesEnum } from "../types";
+import alertsKeys from "../util/alerts-keys";
 
 const useIsWorkJourneyEndingAlert = () => {
-  const alertsQuery = useAlerts();
+  const [alerts] = useStorage<AlertProps[]>(alertsKeys.list());
 
-  return alertsQuery.data?.find(
+  return alerts?.find(
     ({ protocol, validated }) =>
       protocol.name === ProtocolNamesEnum.AVISO_PREVIO_ENCERRAMENTO_JORNADA &&
       !validated

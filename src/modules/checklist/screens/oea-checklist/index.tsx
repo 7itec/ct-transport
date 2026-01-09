@@ -27,6 +27,8 @@ import Toast from "react-native-toast-message";
 import { OeaChecklistAlertProps } from "modules/alerts/types";
 import isAnsweredItem from "modules/checklist/util/is-answered-item";
 import { isAtLeastOneReason } from "modules/checklist/util/is-at-least-one-reason";
+import Loading from "components/loading";
+import useFinishOeaAlert from "modules/checklist/hooks/use-finish-oea-alert";
 
 export interface AttachmentProps {
   text?: string;
@@ -38,16 +40,19 @@ export interface AttachmentProps {
 export type ChecklistProps = "approved" | "disapproved";
 
 const OeaChecklist = () => {
-  const [isLoading, setLoading] = useState(false);
   const { alertId } = useLocalSearchParams<{ alertId: string }>();
   const alertQuery = useAlert(alertId);
 
   const alert = alertQuery.data as OeaChecklistAlertProps | undefined;
 
+  const { isLoading, mutate } = useFinishOeaAlert(
+    alert?.payload?.checklistData?._id!
+  );
+
   const [opened, setOpened] = useState<number>();
   const flatListRef = useRef<FlatList>(null);
 
-  if (!alert) return null;
+  if (!alert) return <Loading />;
 
   const {
     job,
@@ -116,6 +121,8 @@ const OeaChecklist = () => {
         text1: "Erro ao finalizar checklist",
         text2: `Não foi adicionado nenhum anexo para o item ${answeredItemWithoutAttachment.checklistItem.name}.`,
       });
+
+    mutate();
   };
 
   const renderItem = ({

@@ -7,6 +7,7 @@ const useAttendanceDetails = (attendanceId: string) => {
     url: `/jobs/${attendanceId}`,
     queryKey: attendancesKeys.details(attendanceId),
     errorTitle: "Erro ao buscar detalhes do atendimento",
+    refetchInterval: 60 * 2,
   });
 };
 

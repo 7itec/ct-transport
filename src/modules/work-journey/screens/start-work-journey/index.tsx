@@ -19,7 +19,7 @@ import useLogs from "hooks/use-logs";
 import styled from "styled-components/native";
 import Row from "components/row";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const StartWorkJourney: React.FC = () => {
   const trackEvent = useLogs();
@@ -32,6 +32,7 @@ const StartWorkJourney: React.FC = () => {
   const nextWorkJourneyMinStartDate = data?.nextWorkJourneyMinStartDate;
   const nonWorkSchedule = data?.nonWorkSchedule;
   const { bottom } = useSafeAreaInsets();
+  const { latitude, longitude } = useGps();
 
   useEffect(() => {
     if (standBy)
@@ -121,8 +122,6 @@ const StartWorkJourney: React.FC = () => {
           {
             text: "iniciar",
             onPress: async () => {
-              const { latitude, longitude } = await getGpsCoordinates();
-
               trackEvent("Start Inter Journey");
               startWorkJourneyMutation.mutate({
                 _id,
@@ -146,8 +145,6 @@ const StartWorkJourney: React.FC = () => {
           text: "iniciar",
           onPress: async () => {
             trackEvent("Start Work Journey");
-
-            const { latitude, longitude } = await getGpsCoordinates();
 
             startWorkJourneyMutation.mutate({
               _id,

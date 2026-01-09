@@ -1,8 +1,11 @@
-import Location from "react-native-background-geolocation";
+import BackgroundGeolocation from "react-native-background-geolocation";
 
 const getGpsCoordinates = async () => {
-  const { coords } = await Location.getCurrentPosition({
-    desiredAccuracy: Location.DESIRED_ACCURACY_HIGH,
+  const { coords } = await BackgroundGeolocation.getCurrentPosition({
+    samples: 1,
+    timeout: 30,
+    maximumAge: 10_000,
+    desiredAccuracy: 10,
   });
 
   return coords;

@@ -21,6 +21,7 @@ import {
   Button,
 } from "./styles";
 import Regular from "components/text/variants/regular";
+import { Portal } from "@gorhom/portal";
 
 interface Props {
   onClose: () => void;
@@ -64,35 +65,37 @@ const Camera: React.FC<Props> = ({ onClose, onConfirm }) => {
   };
 
   return (
-    <Container>
-      <StatusBar hidden />
-      {showCamera && !image && (
-        <CameraView style={{ flex: 1 }} ref={cameraRef} />
-      )}
-      {image && <Picture source={{ uri: image }} />}
-      <CloseButton onPress={onClose}>
-        <Ionicons name="close" size={30} color="white" />
-      </CloseButton>
-      {!image && (
-        <TakeShot style={styles} onPress={handleImage}>
-          <InnerCircle />
-        </TakeShot>
-      )}
-      {image && (
-        <Row>
-          <Button onPress={() => setImage(undefined)}>
-            <Regular size="large" color="white">
-              Repetir
-            </Regular>
-          </Button>
-          <Button onPress={handleSubmit}>
-            <Regular size="large" color="white">
-              Ok
-            </Regular>
-          </Button>
-        </Row>
-      )}
-    </Container>
+    <Portal>
+      <Container>
+        <StatusBar hidden />
+        {showCamera && !image && (
+          <CameraView style={{ flex: 1 }} ref={cameraRef} />
+        )}
+        {image && <Picture source={{ uri: image }} />}
+        <CloseButton onPress={onClose}>
+          <Ionicons name="close" size={30} color="white" />
+        </CloseButton>
+        {!image && (
+          <TakeShot style={styles} onPress={handleImage}>
+            <InnerCircle />
+          </TakeShot>
+        )}
+        {image && (
+          <Row>
+            <Button onPress={() => setImage(undefined)}>
+              <Regular size="large" color="white">
+                Repetir
+              </Regular>
+            </Button>
+            <Button onPress={handleSubmit}>
+              <Regular size="large" color="white">
+                Ok
+              </Regular>
+            </Button>
+          </Row>
+        )}
+      </Container>
+    </Portal>
   );
 };
 

@@ -3,7 +3,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { colors } from "assets/colors";
 import { StatusBar } from "expo-status-bar";
-import { RefreshControl } from "react-native";
 import Loading from "components/loading";
 
 import { BoldText, RegularText } from "components/text";
@@ -11,7 +10,6 @@ import { BoldText, RegularText } from "components/text";
 import dateFnsHelpers from "util/date-fns-helpers";
 import { Stack } from "expo-router";
 import styled from "styled-components/native";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import {
   launchImageLibraryAsync,
   PermissionStatus,
@@ -20,9 +18,10 @@ import {
 import Toast from "react-native-toast-message";
 import useUpdateAvatar from "../hooks/use-update-avatar";
 import useLogs from "hooks/use-logs";
+import useProfileStorage from "../storage/use-profile-storage";
 
 const Profile: React.FC = () => {
-  const { data, isLoading, refetch, isRefetching } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const updateAvatarMutation = useUpdateAvatar();
   const trackEvent = useLogs();
 
@@ -45,22 +44,18 @@ const Profile: React.FC = () => {
     updateAvatarMutation.mutate(assets[0].uri);
   };
 
-  if (isLoading || !data?.currentWorkJourney) return <Loading />;
-
   return (
     <>
-      <Container
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-        }
-      >
+      <Container>
         <StatusBar translucent />
         <Header>
           <Avatar>
-            {!data?.avatar && (
+            {!profile?.avatar && (
               <Ionicons name="person" size={26} color={colors.primary} />
             )}
-            {data?.avatar && <AvatarImage source={{ uri: data.avatar }} />}
+            {profile?.avatar && (
+              <AvatarImage source={{ uri: profile.avatar }} />
+            )}
             <ChangeAvatar onPress={handleGetAvatar}>
               {!updateAvatarMutation.isLoading && (
                 <Ionicons name="create" size={16} />
@@ -71,23 +66,23 @@ const Profile: React.FC = () => {
         </Header>
         <Content>
           <Card>
-            <BoldText size="medium">{data?.driverName}</BoldText>
-            <RegularText size="small">{data?.companyName}</RegularText>
+            <BoldText size="medium">{profile?.driverName}</BoldText>
+            <RegularText size="small">{profile?.companyName}</RegularText>
           </Card>
           <Card>
             <RegularText color="gray" size="small">
               Grupo
             </RegularText>
-            <RegularText>{data?.group?.name}</RegularText>
+            <RegularText>{profile?.group?.name}</RegularText>
           </Card>
           <Card>
             <RegularText color="gray" size="small">
               Início da jornada
             </RegularText>
             <RegularText>
-              {data?.currentWorkJourney?.registrationDate &&
+              {profile?.currentWorkJourney?.registrationDate &&
                 dateFnsHelpers.defaultFormat(
-                  data.currentWorkJourney.registrationDate
+                  profile.currentWorkJourney.registrationDate
                 )}
             </RegularText>
           </Card>

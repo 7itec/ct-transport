@@ -7,11 +7,12 @@ import useAlert from "modules/alerts/hooks/use-alert";
 import { UpdateWorkStopTypeProps } from "modules/work-records/types";
 import useUpdateWorkStop from "modules/work-records/hooks/use-update-work-stop";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const useWorkStopState = (workRecordId: string, alertId: string) => {
   const { data, isLoading } = useWorkRecord(workRecordId);
   const alertQuery = useAlert(alertId);
+  const { latitude, longitude } = useGps();
 
   const { previousWorkStop, requestedWorkStopChange, workStopId } =
     (alertQuery.data?.payload as UpdateWorkStopTypeProps) ?? {};
@@ -52,8 +53,6 @@ const useWorkStopState = (workRecordId: string, alertId: string) => {
       workStopId,
       alertId,
     });
-
-    const { latitude, longitude } = await getGpsCoordinates();
 
     updateWorkStopMutation.mutate({
       workStopId,

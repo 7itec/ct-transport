@@ -1,11 +1,11 @@
 import { router } from "expo-router";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
-import { DriverStatus, WorkStopsEnum } from "modules/work-journey/types";
+import { DriverStatus } from "modules/work-journey/types";
 import { useCallback, useMemo } from "react";
 import useSkipLuncthTimeUntil from "../storage/use-skip-lunch-time-until";
 import dateFnsHelpers from "util/date-fns-helpers";
-import { addHours, addMinutes } from "date-fns";
+import { addHours } from "date-fns";
 import notifee, { TimestampTrigger, TriggerType } from "@notifee/react-native";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 interface ScheduleNotificationProps {
   id: string;
@@ -14,14 +14,14 @@ interface ScheduleNotificationProps {
 }
 
 const useHandleLunchTime = () => {
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
 
   const { skipLunchTimeUntil, setSkipLunchTimeUntil } =
     useSkipLuncthTimeUntil();
 
   const registrationDate = useMemo(
-    () => data?.currentWorkJourney?.registrationDate,
-    [data]
+    () => profile?.currentWorkJourney?.registrationDate,
+    [profile]
   );
 
   const canScheduleNotification = useCallback(
@@ -83,12 +83,12 @@ const useHandleLunchTime = () => {
       "LUNCH_TIME_THIRD_NOTIFICATION",
     ]);
 
-    if (!data) return false;
+    if (!profile) return false;
 
     if (skipLunchTimeUntil && dateFnsHelpers.isAfterNow(skipLunchTimeUntil))
       return false;
 
-    const { requiredLunchStop, currentWorkJourney, pendingCampaign } = data;
+    const { requiredLunchStop, currentWorkJourney, pendingCampaign } = profile;
 
     if (
       !requiredLunchStop ||
@@ -113,7 +113,7 @@ const useHandleLunchTime = () => {
     router.push("/work-journey/lunch-time-needed");
 
     return true;
-  }, [data, scheduleNotifications]);
+  }, [profile, scheduleNotifications]);
 
   return resolve;
 };

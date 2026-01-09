@@ -5,9 +5,17 @@ interface Props {
   vehicle: VehicleProps;
   checklist: ChecklistDraftProps[];
   registrationDate: Date;
+  latitude: number;
+  longitude: number;
 }
 
-export default ({ vehicle, checklist, registrationDate }: Props) => {
+export default ({
+  vehicle,
+  checklist,
+  registrationDate,
+  latitude,
+  longitude,
+}: Props) => {
   const formData = new FormData();
 
   const approvedChecklistItems = checklist.filter(
@@ -47,8 +55,6 @@ export default ({ vehicle, checklist, registrationDate }: Props) => {
   const data = {
     registrationDate,
     vehicle: vehicle._id,
-    latitude: -21.039145,
-    longitude: -51.237164,
     approvedChecklistItems,
     disapprovedChecklistItems,
     supportMaterials: {
@@ -57,6 +63,8 @@ export default ({ vehicle, checklist, registrationDate }: Props) => {
       returned: [],
       requested: [],
     },
+    latitude,
+    longitude,
   };
 
   formData.append("checklistData", JSON.stringify(data));

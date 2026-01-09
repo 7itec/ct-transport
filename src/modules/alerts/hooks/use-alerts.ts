@@ -15,6 +15,7 @@ const useAlerts = () => {
       orderBy: -1,
       orderField: "_id",
     },
+    refetchInterval: 60 * 2,
   });
 };
 

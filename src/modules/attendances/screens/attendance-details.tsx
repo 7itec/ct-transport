@@ -1,7 +1,6 @@
 import Column from "components/column";
 import Row from "components/row";
 import { MediumText, RegularText } from "components/text";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import { StyleSheet, View } from "react-native";
 import styled from "styled-components/native";
 import useAttendanceDetails from "../hooks/use-attendance-details";
@@ -9,30 +8,26 @@ import { useLocalSearchParams } from "expo-router";
 import Loading from "components/loading";
 import AttendanceAddress from "../components/attendance-address";
 import dateFnsHelpers from "util/date-fns-helpers";
-import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import AttendanceButtons from "../components/attendance-buttons";
 import AttendanceMap from "../components/attendance-map";
 import StatusButton from "components/status-button";
 import Passenger from "../components/passenger";
 import { useEffect } from "react";
-import Material from "../components/material";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const AttendanceDetails = () => {
   const { attendanceId } = useLocalSearchParams<{ attendanceId: string }>();
   const { data, isLoading, refetch } = useAttendanceDetails(attendanceId);
-  const currentWorkJourneyQuery = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const { bottom } = useSafeAreaInsets();
 
   useEffect(() => {
     refetch();
   }, []);
 
-  if (isLoading || currentWorkJourneyQuery.isLoading || !data)
-    return <Loading />;
+  if (isLoading || !data) return <Loading />;
 
   return (
     <>
@@ -65,11 +60,9 @@ const AttendanceDetails = () => {
                 </Row>
                 <Row justifyContent="space-between">
                   <Column>
-                    <MediumText>
-                      {currentWorkJourneyQuery.data?.driverName}
-                    </MediumText>
+                    <MediumText>{profile?.driverName}</MediumText>
                     <RegularText size="small">
-                      {currentWorkJourneyQuery.data?.companyName}
+                      {profile?.companyName}
                     </RegularText>
                   </Column>
                   <Column>

@@ -125,11 +125,3 @@ const Container = styled.View`
   gap: 15px;
   background-color: white;
 `;
-
-const Logo = styled.Image`
-  margin-top: 30px;
-  width: 150px;
-  height: 80px;
-  resize-mode: contain;
-  align-self: center;
-`;

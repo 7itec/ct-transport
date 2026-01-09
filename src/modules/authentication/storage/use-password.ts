@@ -1,7 +1,7 @@
 import useStorage from "hooks/use-storage";
 
 const usePassword = () => {
-  const [encryptedPassword, setPassword] = useStorage("password");
+  const [encryptedPassword, setPassword] = useStorage<string>("password");
 
   return { encryptedPassword, setPassword };
 };

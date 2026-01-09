@@ -1,12 +1,12 @@
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import { useEffect, useRef, useCallback } from "react";
 import BackgroundGeolocation, {
   Location as RNBGLocation,
 } from "react-native-background-geolocation";
 import useApi from "hooks/use-api";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const useUpdateRecentPosition = () => {
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const api = useApi(
     "https://cicm-api-recent-positions-f7btdehuaehvbbd3.eastus-01.azurewebsites.net"
   );
@@ -21,7 +21,7 @@ const useUpdateRecentPosition = () => {
     async (location: RNBGLocation) => {
       const now = Date.now();
       if (now - lastSentAtRef.current < UPDATE_INTERVAL_MS) return;
-      if (!data?.currentWorkJourney?.conductorVehicle?._id) return;
+      if (!profile?.currentWorkJourney?.conductorVehicle?._id) return;
       if (isRequesting.current) return;
 
       isRequesting.current = true;
@@ -30,7 +30,7 @@ const useUpdateRecentPosition = () => {
       try {
         await api({
           method: "PATCH",
-          url: `/vehicles/${data.currentWorkJourney.conductorVehicle._id}/recent-position`,
+          url: `/vehicles/${profile.currentWorkJourney.conductorVehicle._id}/recent-position`,
           data: {
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -43,7 +43,7 @@ const useUpdateRecentPosition = () => {
         isRequesting.current = false;
       }
     },
-    [data?.currentWorkJourney?.conductorVehicle?._id]
+    [profile?.currentWorkJourney?.conductorVehicle?._id]
   );
 
   useEffect(() => {
@@ -92,7 +92,7 @@ const useUpdateRecentPosition = () => {
       mounted.current = false;
       BackgroundGeolocation.stopWatchPosition();
     };
-  }, [handleLocation, data?.currentWorkJourney?.conductorVehicle?._id]);
+  }, [handleLocation, profile?.currentWorkJourney?.conductorVehicle?._id]);
 };
 
 export default useUpdateRecentPosition;

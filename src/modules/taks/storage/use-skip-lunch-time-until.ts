@@ -1,8 +1,9 @@
 import useStorage from "hooks/use-storage";
 
 const useSkipLuncthTimeUntil = () => {
-  const [skipLunchTimeUntil, setSkipLunchTimeUntil] =
-    useStorage("skipLunchTimeUntil");
+  const [skipLunchTimeUntil, setSkipLunchTimeUntil] = useStorage<Date | null>(
+    "skipLunchTimeUntil"
+  );
 
   return { skipLunchTimeUntil, setSkipLunchTimeUntil };
 };

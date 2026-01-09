@@ -9,17 +9,18 @@ const useConfirmVehicle = () => {
     usersKeys.profile()
   );
 
-  const onSuccess = (_: any, { vehicle }: any) => {
+  const onSuccess = (_: any, { workJourneyVehicles }: any) => {
     if (!profile?.currentWorkJourney) return;
 
     setData({
       ...profile,
       currentWorkJourney: {
         ...profile.currentWorkJourney,
-        conductorVehicle: vehicle,
+        ...workJourneyVehicles,
       },
     });
 
+    router.dismissAll();
     router.replace("/");
   };
 

@@ -20,7 +20,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import useFinishAttendance from "../hooks/use-finish-attendance";
 import useUploadReceipt, { ReceiptTypeEnum } from "../hooks/use-upload-receipt";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const FinishAttendance: React.FC = () => {
   const { attendanceId } = useLocalSearchParams<{ attendanceId: string }>();
@@ -31,6 +31,7 @@ const FinishAttendance: React.FC = () => {
   const finishAttendanceWithCameraMutation = useFinishAttendance(attendanceId);
   const uploadReceiptMutation = useUploadReceipt(attendanceId);
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
   const handleOK = async (signature: string) => {
     const path = `${cacheDirectory}/${new Date().getTime()}.png`;
@@ -48,8 +49,6 @@ const FinishAttendance: React.FC = () => {
       receiptType: ReceiptTypeEnum.DIGITAL_SIGNATURE,
     });
 
-    const { latitude, longitude } = await getGpsCoordinates();
-
     uploadReceipt(path, ReceiptTypeEnum.DIGITAL_SIGNATURE);
     finishAttendanceWithSignatureMutation.mutate({
       latitude,
@@ -63,8 +62,6 @@ const FinishAttendance: React.FC = () => {
       attendanceId,
       receiptType: ReceiptTypeEnum.RECEIPT_PHOTO,
     });
-
-    const { latitude, longitude } = await getGpsCoordinates();
 
     uploadReceipt(uri, ReceiptTypeEnum.RECEIPT_PHOTO);
     finishAttendanceWithCameraMutation.mutate({

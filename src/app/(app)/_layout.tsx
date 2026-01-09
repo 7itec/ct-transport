@@ -43,6 +43,7 @@ export default function RootLayout() {
 
   if (!locationPermission || !cameraPermission)
     return <Redirect href="/permissions" />;
+
   if (!token) return <Redirect href="/login" />;
 
   if (isLoading || !data) return <Loading />;

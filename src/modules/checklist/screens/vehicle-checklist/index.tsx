@@ -19,14 +19,11 @@ import dateFnsHelpers from "util/date-fns-helpers";
 import Column from "components/column";
 import Row from "components/row";
 import styled from "styled-components/native";
-import Option from "./components/option";
-import { VehicleProps } from "modules/checklist/types";
-import useAttachedVehiclesStorage from "modules/checklist/storage/use-attached-vehicles-storage";
-import AttachedVehicle from "./components/attached-vehice";
 import Empty from "components/empty";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
+import Toast from "react-native-toast-message";
 
 export interface AttachmentProps {
   text?: string;
@@ -51,11 +48,9 @@ const VehicleChecklist: React.FC = () => {
   const flatListRef = useRef<FlatList>(null);
   const answerChecklistMutation = useAnswerChecklist();
   const confirmVehicleMutation = useConfirmVehicle();
-  const [showChecklistItems, setShowChecklistItems] = useState(true);
-  const { attachedVehicles, setAttachedVehicles } =
-    useAttachedVehiclesStorage();
   const { bottom } = useSafeAreaInsets();
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
   const {
     checklistItems,
@@ -154,11 +149,7 @@ const VehicleChecklist: React.FC = () => {
     setOpened((prev) => [...prev, checklistItemId]);
   };
 
-  const renderItem = ({
-    item,
-  }: ListRenderItemInfo<ChecklistItemProps | VehicleProps>) => {
-    if ("plate" in item) return <AttachedVehicle {...item} />;
-
+  const renderItem = ({ item }: ListRenderItemInfo<ChecklistItemProps>) => {
     const answeredItem = checklist.find(
       (someChecklistItem) => someChecklistItem._id === item._id
     );
@@ -180,31 +171,37 @@ const VehicleChecklist: React.FC = () => {
   };
 
   const handleAnswerChecklist = async () => {
+    if (checklistItems.length > checklist.length)
+      return Toast.show({
+        type: "error",
+        text1: "Erro ao enviar checklist",
+        text2: "Por favor preencha todos os itens",
+      });
+
     await answerChecklistMutation.mutate({
       vehicle: data,
       checklist,
       registrationDate: new Date().toISOString(),
+      latitude,
+      longitude,
     });
 
     trackEvent("Checklist Answered", { vehicleId, data });
 
-    const isAttachement = data?.type == "ATTACHED";
+    const isAttachement = data?.type === "ATTACHED";
 
-    if (isAttachement) {
-      setAttachedVehicles((prev) => [...prev, data]);
-      router.dismiss(2);
-      return;
-    }
+    if (isAttachement) return router.back();
+
+    if (data?.canBeAttached)
+      return router.replace("/checklists/vehicles-draft");
 
     trackEvent("Vehicle Added", { id: vehicleId, plate: data?.plate });
-
-    const { latitude, longitude } = await getGpsCoordinates();
 
     await confirmVehicleMutation.mutate({
       latitude,
       longitude,
       conductorVehicle: vehicleId,
-      attachedVehicles: attachedVehicles.map((vehicle) => vehicle._id),
+      attachedVehicles: [],
       registrationDate: dateFnsHelpers.addSeconds(new Date(), 2),
       vehicle: data,
     });
@@ -225,38 +222,19 @@ const VehicleChecklist: React.FC = () => {
           ref={flatListRef}
           contentContainerStyle={{
             paddingBottom: 15,
-            flexGrow:
-              (showChecklistItems ? checklistItems : attachedVehicles)?.length >
-              0
-                ? undefined
-                : 1,
+            flexGrow: checklistItems?.length > 0 ? undefined : 1,
           }}
           ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
-          ListEmptyComponent={
-            <Empty
-              description={
-                showChecklistItems
-                  ? "Nenhum item encontrado"
-                  : "Nenhum veículo informado"
-              }
-            />
-          }
+          ListEmptyComponent={<Empty description={"Nenhum item encontrado"} />}
           ListFooterComponent={
             <View style={{ paddingTop: 20, paddingHorizontal: 15 }}>
               <Button
-                label={showChecklistItems ? "Finalizar" : "Selecionar veículo"}
+                label={"Finalizar"}
                 isLoading={
                   answerChecklistMutation.isLoading ||
                   confirmVehicleMutation.isLoading
                 }
-                onPress={() =>
-                  showChecklistItems
-                    ? handleAnswerChecklist()
-                    : router.push({
-                        pathname: "/checklists/select-vehicle",
-                        params: { type: "ATTACHED" },
-                      })
-                }
+                onPress={() => handleAnswerChecklist()}
               />
             </View>
           }
@@ -308,42 +286,12 @@ const VehicleChecklist: React.FC = () => {
                     </Column>
                   </Row>
                 </Card>
-                {data?.type === "CONDUCTOR" && data?.canBeAttached && (
-                  <>
-                    <SemilBoldText>Ações</SemilBoldText>
-                    <Row
-                      style={{
-                        backgroundColor: "white",
-                        alignSelf: "flex-start",
-                        borderRadius: 15,
-                        padding: 3,
-                      }}
-                    >
-                      <Option
-                        label="Responder checklist"
-                        active={showChecklistItems}
-                        onPress={() => setShowChecklistItems(true)}
-                        icon={"clipboard-list"}
-                      />
-                      <Option
-                        label="Acoplar veículos"
-                        active={!showChecklistItems}
-                        onPress={() => setShowChecklistItems(false)}
-                        icon={"truck-trailer"}
-                      />
-                    </Row>
-                  </>
-                )}
-                <SemilBoldText size="medium">
-                  {showChecklistItems
-                    ? "Itens do checklist"
-                    : "Veículos acoplados"}
-                </SemilBoldText>
+                <SemilBoldText size="medium">Itens do checklist</SemilBoldText>
               </Content>
             </>
           }
           {...{
-            data: showChecklistItems ? checklistItems : attachedVehicles,
+            data: checklistItems,
             renderItem,
           }}
         />

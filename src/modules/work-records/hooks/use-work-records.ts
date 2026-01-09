@@ -1,15 +1,15 @@
 import { endOfDay } from "date-fns";
 import useApiQuery from "hooks/use-api-query";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import dateFnsHelpers from "util/date-fns-helpers";
 import { WorkRecordProps } from "../types";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const useWorkRecords = () => {
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
 
-  const startDate = data?.currentWorkJourney
+  const startDate = profile?.currentWorkJourney
     ? dateFnsHelpers.format(
-        data?.currentWorkJourney?.registrationDate,
+        profile?.currentWorkJourney?.registrationDate,
         "yyyy-MM-dd"
       )
     : null;
@@ -25,7 +25,7 @@ const useWorkRecords = () => {
         { value: { date: endDate, time: "23:59" }, operator: "<=" },
       ]),
     },
-    enabled: !!data,
+    enabled: !!profile,
   });
 };
 

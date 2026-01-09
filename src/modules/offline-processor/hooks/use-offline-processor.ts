@@ -1,13 +1,13 @@
 import useOfflineRequests from "./use-offline-requests";
 import { useEffect } from "react";
 import dateFnsHelpers from "util/date-fns-helpers";
-import useStorage from "hooks/use-storage";
+import useServerConnection from "./use-server-connection";
 
 const useOfflineProcessor = () => {
   const { requests, updateOfflineRequest, resolveRequest } =
     useOfflineRequests();
 
-  const isServerConnection = useStorage("serverConnection");
+  const isServerConnection = useServerConnection();
 
   const canResolveRequest = async () => {
     const isResolving = requests.find(

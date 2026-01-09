@@ -14,8 +14,9 @@ import mapStyle from "./mapStyle";
 import { useBackHandler } from "@react-native-community/hooks";
 
 import { Container, Marker, MarkerIcon, Shadow, Confirm } from "./styles";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 import Loading from "components/loading";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MARKER_SIZE = 30;
 
@@ -27,12 +28,12 @@ interface Props {
 
 const Map: React.FC<Props> = ({ coordinates, confirm, close }) => {
   const active = useSharedValue(false);
+  const { bottom } = useSafeAreaInsets();
   const [center, setCenter] = useState(coordinates);
+  const { latitude, longitude } = useGps();
 
   const initMap = async () => {
     if (coordinates) return;
-
-    const { latitude, longitude } = await getGpsCoordinates();
 
     setCenter({ latitude, longitude });
   };
@@ -101,7 +102,7 @@ const Map: React.FC<Props> = ({ coordinates, confirm, close }) => {
         <MarkerIcon style={blackMarkerStyles} source={blackMarker} />
       </Marker>
       <Shadow />
-      <Confirm>
+      <Confirm style={{ bottom: bottom + 15 }}>
         <Button textColor="white" label="Confirmar" onPress={handleConfirm} />
       </Confirm>
     </Container>

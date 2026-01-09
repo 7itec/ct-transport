@@ -12,30 +12,30 @@ const useTaksManagement = () => {
   const handleExpiredWorkJourney = useExpiredWorkJourney();
 
   const handleTaksManagement = useCallback(async () => {
-    console.log();
-    console.log("handleTaks", dateFnsHelpers.defaultFormat(new Date()));
+    // console.log();
+    // console.log("handleTaks", dateFnsHelpers.defaultFormat(new Date()));
 
     const expiredWorkJourney = handleExpiredWorkJourney();
 
-    console.log("expiredWorkJourney", expiredWorkJourney);
+    // console.log("expiredWorkJourney", expiredWorkJourney);
 
     if (expiredWorkJourney) return;
 
     const lunchTime = await handleLunchTime();
 
-    console.log("handleLunchTime", lunchTime);
+    // console.log("handleLunchTime", lunchTime);
 
     if (lunchTime) return;
 
     const uninformedStop = await handleUninformedStop();
 
-    console.log("handleUninformedStop", uninformedStop);
+    // console.log("handleUninformedStop", uninformedStop);
 
     if (uninformedStop) return;
 
     const workJourneyStandardLimit = handleWorkJourneyStandardLimit();
 
-    console.log("handleWorkJourneyStandardLimit", workJourneyStandardLimit);
+    // console.log("handleWorkJourneyStandardLimit", workJourneyStandardLimit);
 
     if (workJourneyStandardLimit) return;
   }, [handleLunchTime, handleUninformedStop, handleWorkJourneyStandardLimit]);

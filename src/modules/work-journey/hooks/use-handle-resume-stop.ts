@@ -1,21 +1,22 @@
 import { Alert } from "react-native";
-import useCurrentWorkJourney from "./use-current-work-journey";
 import useResumeStop from "./use-resume-stop";
 import dateFnsHelpers from "util/date-fns-helpers";
 import Toast from "react-native-toast-message";
 import { WorkStopsEnum } from "../types";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const useHandleResumeStop = () => {
   const resumeStopMutation = useResumeStop();
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const trackEvent = useLogs();
 
   const handleResumeStop = () => {
-    if (!data?.currentWorkJourney?.lastWorkRecord) return;
+    if (!profile?.currentWorkJourney?.lastWorkRecord) return;
+    const { latitude, longitude } = useGps();
 
-    const { lastWorkRecord, stopCounts } = data.currentWorkJourney;
+    const { lastWorkRecord, stopCounts } = profile.currentWorkJourney;
 
     const workStopId = lastWorkRecord?.payload?.workStopId;
     const lunchStops = stopCounts.lunch;
@@ -48,10 +49,9 @@ const useHandleResumeStop = () => {
           onPress: async () => {
             trackEvent("Finish Stop", {
               workStopName:
-                data?.currentWorkJourney?.lastWorkRecord?.payload?.workStopName,
+                profile?.currentWorkJourney?.lastWorkRecord?.payload
+                  ?.workStopName,
             });
-
-            const { latitude, longitude } = await getGpsCoordinates();
 
             resumeStopMutation.mutate({
               latitude,

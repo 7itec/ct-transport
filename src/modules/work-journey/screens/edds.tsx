@@ -4,15 +4,17 @@ import { Pressable } from "react-native";
 import styled from "styled-components/native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect, useRef, useState } from "react";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import useFinishCampaign from "modules/work-journey/hooks/use-finish-campaign";
 import { RegularText } from "components/text";
 import Loading from "components/loading";
 import useLogs from "hooks/use-logs";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const Edds: React.FC = () => {
-  const { data } = useCurrentWorkJourney();
-  const finishCampaignMutation = useFinishCampaign(data?.pendingCampaign?._id!);
+  const { profile } = useProfileStorage();
+  const finishCampaignMutation = useFinishCampaign(
+    profile?.pendingCampaign?._id!
+  );
 
   const [isFinished, setFinished] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -20,14 +22,14 @@ const Edds: React.FC = () => {
   const trackEvent = useLogs();
 
   const player = useVideoPlayer(
-    { uri: data?.pendingCampaign?.video },
+    { uri: profile?.pendingCampaign?.video },
     (player) => {
       player.play();
     }
   );
 
   const onFullscreenUpdate = async () => {
-    if (data?.pendingCampaign?.orientation === "Landscape")
+    if (profile?.pendingCampaign?.orientation === "Landscape")
       await ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.LANDSCAPE
       );
@@ -42,8 +44,8 @@ const Edds: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (data && !showVideo) onFullscreenUpdate();
-  }, [data]);
+    if (profile && !showVideo) onFullscreenUpdate();
+  }, [profile]);
 
   return (
     <>

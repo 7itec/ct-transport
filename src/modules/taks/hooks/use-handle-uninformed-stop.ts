@@ -1,21 +1,25 @@
-import useAttendances from "modules/attendances/hooks/use-attendances";
-import { AttendanceStatusEnum } from "modules/attendances/types";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
+import {
+  AttendanceProps,
+  AttendanceStatusEnum,
+} from "modules/attendances/types";
 import { DriverStatus } from "modules/work-journey/types";
 import { useCallback, useRef } from "react";
 import BackgroundGeolocation from "react-native-background-geolocation";
 import useSkipUninformedStopUntil from "../storage/use-skip-uninformed-stop-until";
 import dateFnsHelpers from "util/date-fns-helpers";
 import { router } from "expo-router";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
+import useStorage from "hooks/use-storage";
+import attendancesKeys from "modules/attendances/util/attendances-keys";
 
 const useHandleUninformedStop = () => {
-  const attendancesQuery = useAttendances();
-  const { data } = useCurrentWorkJourney();
+  const [attendances] = useStorage<AttendanceProps[]>(attendancesKeys.list());
+  const { profile } = useProfileStorage();
   const { skipUninformedStopUntil, setSkipUninformedStopUntil } =
     useSkipUninformedStopUntil();
   const timerRef = useRef<number | null>(null);
 
-  const isDisplacement = attendancesQuery.data?.find(
+  const isDisplacement = attendances?.find(
     (attendance) =>
       AttendanceStatusEnum.Displacement === attendance.status ||
       AttendanceStatusEnum.Arrival === attendance.status ||
@@ -28,14 +32,14 @@ const useHandleUninformedStop = () => {
       timerRef.current = null;
     }
 
-    if (!data) return false;
+    if (!profile) return false;
 
     const location = await BackgroundGeolocation.getCurrentPosition({
       samples: 1, // mais preciso
       persist: false,
     });
 
-    const { currentWorkJourney } = data;
+    const { currentWorkJourney } = profile;
     const { is_moving: isMoving, coords } = location;
 
     if (!coords) return;
@@ -62,8 +66,8 @@ const useHandleUninformedStop = () => {
 
     return true;
   }, [
-    attendancesQuery.data,
-    data,
+    attendances,
+    profile,
     skipUninformedStopUntil,
     setSkipUninformedStopUntil,
   ]);

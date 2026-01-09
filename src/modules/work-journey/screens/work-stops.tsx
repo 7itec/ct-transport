@@ -2,8 +2,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Alert, Dimensions, ListRenderItemInfo, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
-import { StatusBar } from "expo-status-bar";
-
 import BottomSheetOption from "components/bottom-sheet-option";
 
 import CircleButton from "components/circle-button";
@@ -18,7 +16,7 @@ import generateId from "util/generate-id";
 import useStopAttendance from "modules/attendances/hooks/use-stop-attendance";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const WorkStops: React.FC = () => {
   const { attendanceId } = useLocalSearchParams<{ attendanceId?: string }>();
@@ -27,6 +25,7 @@ const WorkStops: React.FC = () => {
   const stopMutation = useStop();
   const stopAttendanceMutation = useStopAttendance(attendanceId as string);
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
   const workStops = useMemo(
     () =>
@@ -42,8 +41,6 @@ const WorkStops: React.FC = () => {
   const handleStopPress = useCallback(
     ({ _id: workStopId, name: workStopReason }: WorkStopProps) =>
       async () => {
-        const { latitude, longitude } = await getGpsCoordinates();
-
         const data = {
           latitude,
           longitude,
@@ -71,7 +68,7 @@ const WorkStops: React.FC = () => {
           },
         ]);
       },
-    [location]
+    []
   );
 
   const renderItem = useCallback(

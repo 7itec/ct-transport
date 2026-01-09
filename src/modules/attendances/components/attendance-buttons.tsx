@@ -18,18 +18,19 @@ import useArriveAttendance from "../hooks/use-arrive-attendance";
 import useStartAttendance from "../hooks/use-start-attendance";
 import { router } from "expo-router";
 import useFinishAttendanceStop from "../hooks/use-finish-attendance-stop";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import { DriverStatus } from "modules/work-journey/types";
 import QRCodeScanner from "./qr-code-scanner";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
   const { _id, route, status } = props;
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
   const [showingQRCodeScanner, showQRCodeScanner] = useState(false);
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const roadMap = route?.roadMap ?? [];
   const getAddressLatLngString = (address?: {
     latitude: number;
@@ -68,7 +69,7 @@ const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
   const finishAttendanceStop = useFinishAttendanceStop(_id);
 
   const handleAction = (mutate: any) => {
-    if (data?.currentWorkJourney?.driverStatus === DriverStatus.STOPPED)
+    if (profile?.currentWorkJourney?.driverStatus === DriverStatus.STOPPED)
       return Alert.alert(
         "Erro ao alterar atendimento",
         "Você se encontra parado no momento, por favor finalize a parada para continuar o atendimento"
@@ -82,8 +83,6 @@ const AttendanceButtons: React.FC<AttendanceProps> = (props) => {
         {
           text: "Alterar",
           onPress: async () => {
-            const { latitude, longitude } = await getGpsCoordinates();
-
             mutate({
               registrationDate: new Date(),
               latitude,

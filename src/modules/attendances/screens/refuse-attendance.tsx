@@ -16,7 +16,7 @@ import useRefuseReaons, {
 } from "../hooks/use-refuse-reasons";
 import useRefuseAttendance from "../hooks/use-refuse-attendance";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const RefuseAttendance: React.FC = () => {
   const [search, setSearch] = useState("");
@@ -24,6 +24,7 @@ const RefuseAttendance: React.FC = () => {
   const { attendanceId } = useLocalSearchParams<{ attendanceId: string }>();
   const refuseAttendanceMutation = useRefuseAttendance(attendanceId);
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
   const refuseReasons = useMemo(
     () =>
@@ -46,8 +47,6 @@ const RefuseAttendance: React.FC = () => {
           text: "Recusar",
           onPress: async () => {
             trackEvent("Attendance - Refused", { attendanceId });
-
-            const { latitude, longitude } = await getGpsCoordinates();
 
             refuseAttendanceMutation.mutate({
               latitude,

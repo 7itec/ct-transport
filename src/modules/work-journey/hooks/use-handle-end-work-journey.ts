@@ -1,8 +1,9 @@
 import { Alert } from "react-native";
 import dateFnsHelpers from "util/date-fns-helpers";
-import useCurrentWorkJourney from "./use-current-work-journey";
-import useAttendances from "modules/attendances/hooks/use-attendances";
-import { AttendanceStatusEnum } from "modules/attendances/types";
+import {
+  AttendanceProps,
+  AttendanceStatusEnum,
+} from "modules/attendances/types";
 import { DriverStatus, WorkStopsEnum } from "../types";
 import useValidateAlert from "modules/alerts/hooks/use-validate-alert";
 import useIsWorkJourneyEndingAlert from "modules/alerts/hooks/use-is-work-journey-ending-alert";
@@ -11,54 +12,40 @@ import generateId from "util/generate-id";
 import useResumeStop from "./use-resume-stop";
 import useStopAttendance from "modules/attendances/hooks/use-stop-attendance";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
+import useStorage from "hooks/use-storage";
+import attendancesKeys from "modules/attendances/util/attendances-keys";
 
 const useHandleEndWorkJourney = () => {
   const workJourneyEndingAlert = useIsWorkJourneyEndingAlert();
 
-  const profileQuery = useCurrentWorkJourney();
-  const attendancesQuery = useAttendances();
+  const { profile } = useProfileStorage();
+  const [attendances] = useStorage<AttendanceProps[]>(attendancesKeys.list());
 
   const resumeStopMutation = useResumeStop();
   const endWorkJourneyMutation = useEndWorkJourney();
   const validateAlertMutation = useValidateAlert(workJourneyEndingAlert?._id!);
   const stopAttendanceMutation = useStopAttendance();
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
-  const { currentWorkJourney, group } = profileQuery?.data ?? {};
-  const attendances = attendancesQuery?.data;
-
+  const { currentWorkJourney, group } = profile ?? {};
   const handleEndWorkDay = async () => {
     const lunchTime = currentWorkJourney!.timing.stops.lunch.minutes;
+    const isDriver = group?.name === "Motorista";
 
     if (
-      group?.name === "Motorista" &&
+      isDriver &&
       dateFnsHelpers.differenceInHours(
         new Date(),
         new Date(currentWorkJourney!.registrationDate)
       ) >= 6 &&
-      lunchTime < 30
+      lunchTime < 55
     )
       return Alert.alert(
         "Encerrar jornada de trabalho",
         "Não é possivel encerrar a jornada de trabalho sem cumprir o horário mínimo de alimentação!"
-      );
-
-    if (lunchTime < 60)
-      return Alert.alert(
-        "Encerrar jornada de trabalho",
-        `Você ainda tem ${
-          60 - lunchTime
-        } minutos do seu horário de alimentação a serem cumpridos, deseja realmente encerrar a jornada de trabalho?`,
-        [
-          {
-            text: "cancelar",
-          },
-          {
-            text: "encerrar",
-            onPress: finishJourney,
-          },
-        ]
       );
 
     Alert.alert(
@@ -84,8 +71,6 @@ const useHandleEndWorkJourney = () => {
         AttendanceStatusEnum.InAttendance,
       ].includes(attendance.status)
     );
-
-    const { latitude, longitude } = await getGpsCoordinates();
 
     if (isAttendance)
       await stopAttendanceMutation.mutate({

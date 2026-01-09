@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from "expo-router";
 import useAddOeaAttachment from "modules/checklist/hooks/use-add-oea-attachment";
 import useApproveOeaItem from "modules/checklist/hooks/use-approve-oea-item";
 import useReproveOeaItem from "modules/checklist/hooks/use-reprove-oea-item";
@@ -58,12 +59,14 @@ const useChecklistItemState = ({
   const handleApproveChecklistItem = async () => {
     approveOeaItemMutation.mutate({
       checklistItemId: _id,
+      date: new Date(),
     });
   };
 
   const handleReproveChecklistItem = async () => {
     reproveOeaItemMutation.mutate({
       checklistItemId: _id,
+      date: new Date(),
     });
   };
 

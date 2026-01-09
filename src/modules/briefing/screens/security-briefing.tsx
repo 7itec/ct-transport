@@ -2,16 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useVideoPlayer, VideoView } from "expo-video";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import React from "react";
 import styled from "styled-components/native";
 import * as ScreenOrientation from "expo-screen-orientation";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const SecurityBriefing: React.FC = () => {
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
 
   const player = useVideoPlayer(
-    { uri: data!.activeSecurityCampaign?.video },
+    { uri: profile!.activeSecurityCampaign?.video },
     (player) => {
       player.play();
     }
@@ -32,7 +32,7 @@ const SecurityBriefing: React.FC = () => {
           player={player}
           allowsFullscreen
           onFullscreenEnter={async () => {
-            if (data?.activeSecurityCampaign?.orientation === "Landscape")
+            if (profile?.activeSecurityCampaign?.orientation === "Landscape")
               await ScreenOrientation.unlockAsync();
           }}
           onFullscreenExit={async () =>

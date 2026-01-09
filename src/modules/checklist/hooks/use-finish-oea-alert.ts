@@ -1,10 +1,17 @@
+import { router, useLocalSearchParams } from "expo-router";
 import useApiMutation from "hooks/use-api-mutations";
+import useQueryHelpers from "hooks/use-query-helpers";
+import { AlertProps } from "modules/alerts/types";
+import alertsKeys from "modules/alerts/util/alerts-keys";
 
 const useFinishOeaAlert = (checklistId: string) => {
+  const { alertId } = useLocalSearchParams<{ alertId: string }>();
+  const alertsQuery = useQueryHelpers<AlertProps>(alertsKeys.list());
+
   const onSuccess = () => {
-    // state.alerts = state.alerts.filter(
-    //   (alert: OeaChecklistAlertProps) => alert.payload.checklist !== checklistId
-    // );
+    alertsQuery.remove({ _id: alertId });
+
+    router.back();
   };
 
   return useApiMutation({

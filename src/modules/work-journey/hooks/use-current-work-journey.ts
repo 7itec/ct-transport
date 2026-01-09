@@ -13,6 +13,7 @@ const useCurrentWorkJourney = () => {
     queryKey: usersKeys.profile(),
     enabled: !pendingRequests?.length && !!token,
     errorTitle: "Erro ao atualizar dados da jornada atual",
+    refetchInterval: 60 * 1,
   });
 };
 

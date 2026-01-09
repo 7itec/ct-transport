@@ -1,8 +1,7 @@
-import { useMMKVStorage } from "react-native-mmkv-storage";
-import storage from "util/storage";
+import useStorage from "./use-storage";
 
 const useQueryHelpers = <T>(key: any) => {
-  const [data, updateData] = useMMKVStorage<T>(JSON.stringify(key), storage);
+  const [data, updateData] = useStorage<T>(JSON.stringify(key));
 
   const setData = (data: T) => {
     updateData(data);

@@ -1,25 +1,25 @@
 import { router } from "expo-router";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 import { useCallback } from "react";
 import dateFnsHelpers from "util/date-fns-helpers";
 
 const useExpiredWorkJourney = () => {
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
 
   const resolve = useCallback(() => {
-    if (!data?.currentWorkJourney) return;
+    if (!profile?.currentWorkJourney) return;
 
     if (
       dateFnsHelpers.differenceInMinutesFromNow(
-        data.currentWorkJourney.registrationDate
+        profile.currentWorkJourney.registrationDate
       ) -
-        (data.currentWorkJourney.totalStopTimeInMinutes ?? 0) <=
-      data.companyConfigParameters.maxWorkJourneyTime.minutes
+        (profile.currentWorkJourney.totalStopTimeInMinutes ?? 0) <=
+      profile.companyConfigParameters.maxWorkJourneyTime.minutes
     )
       return false;
 
     return true;
-  }, [data]);
+  }, [profile]);
 
   return resolve;
 };

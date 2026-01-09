@@ -11,7 +11,7 @@ const useServerConnection = () => {
   const api = useApi();
   const [isServerConnection, setServerConnection] = useStorage(
     "serverConnection",
-    false
+    true
   );
   const isRequesting = useRef(false);
 

@@ -1,8 +1,8 @@
-import Animated from 'react-native-reanimated';
-import styled from 'styled-components/native';
-import {Dimensions} from 'react-native';
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
+import Animated from "react-native-reanimated";
+import styled from "styled-components/native";
+import { Dimensions } from "react-native";
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 const ELIPSE_SIZE = 8;
 const MARKER_SIZE = 30;
 
@@ -48,7 +48,6 @@ export const MarkerIcon = styled(Animated.Image)`
 
 export const Confirm = styled.View`
   position: absolute;
-  bottom: 15px;
   left: 15px;
   right: 15px;
   z-index: 1000;

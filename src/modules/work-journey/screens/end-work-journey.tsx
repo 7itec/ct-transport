@@ -24,7 +24,8 @@ import useEndWorkJourney from "modules/work-journey/hooks/use-end-work-journey";
 import useResumeStop from "modules/work-journey/hooks/use-resume-stop";
 import useCreateRectification from "modules/work-journey/hooks/use-create-rectification";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const EndWorkJourney: React.FC = () => {
   const { data, isLoading, refetch, isRefetching } = useCurrentWorkJourney();
@@ -34,12 +35,20 @@ const EndWorkJourney: React.FC = () => {
   const [isShowingBottomsheet, showBottomSheet] = useState(false);
   const [date, setDate] = useState<Date>();
   const trackEvent = useLogs();
+  const { bottom } = useSafeAreaInsets();
+  const { latitude, longitude } = useGps();
 
   const endWorkJourneyMutation = useEndWorkJourney();
   const resumeStopMutation = useResumeStop();
   const createRectificationMutation = useCreateRectification();
   const lastWorkRecordRegistrationDate =
     data!.currentWorkJourney?.lastWorkRecord?.registrationDate;
+
+  useEffect(() => {
+    trackEvent("Expired Work Journey", {
+      workJourneyDuration,
+    });
+  }, []);
 
   if (isLoading || !data?.currentWorkJourney) return <Loading />;
 
@@ -59,12 +68,6 @@ const EndWorkJourney: React.FC = () => {
     if (!date) return;
     setDate(date);
   };
-
-  useEffect(() => {
-    trackEvent("Expired Work Journey", {
-      workJourneyDuration,
-    });
-  }, []);
 
   const handleEndWorkJorney = () => {
     if (!date)
@@ -120,8 +123,6 @@ const EndWorkJourney: React.FC = () => {
     const endWorkJourneyDate = isStopped
       ? dateFnsHelpers.addSeconds(date!, 1)
       : date;
-
-    const { latitude, longitude } = await getGpsCoordinates();
 
     if (isStopped)
       await resumeStopMutation.mutate({
@@ -221,7 +222,7 @@ const EndWorkJourney: React.FC = () => {
           </Buttons>
         </Content>
       </Container>
-      <Pressable onPress={logout}>
+      <Pressable onPress={logout} style={{ paddingBottom: bottom + 15 }}>
         <Exit>Sair</Exit>
       </Pressable>
       <Stack.Screen options={{ headerShown: false }} />

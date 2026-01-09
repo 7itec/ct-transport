@@ -5,7 +5,6 @@ import { Alert, Pressable, TextInput } from "react-native";
 import InputGroup from "components/input-group";
 import Button from "components/button";
 import Biometrics from "react-native-biometrics";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 import Toast from "react-native-toast-message";
 
 import styled from "styled-components/native";
@@ -21,6 +20,7 @@ import Column from "components/column";
 import useLogout from "../hooks/use-logout";
 import { router } from "expo-router";
 import useLogs from "hooks/use-logs";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 
 const RenewSession: React.FC = () => {
   const passwordInputRef = useRef<TextInput>(null);
@@ -31,7 +31,7 @@ const RenewSession: React.FC = () => {
   const { startSession } = useSession();
   const { encryptedPassword } = usePassword();
 
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const logout = useLogout();
   const trackEvent = useLogs();
 
@@ -99,15 +99,15 @@ const RenewSession: React.FC = () => {
       <Form>
         <ProfileCard>
           <AvatarBox>
-            {data?.avatar ? (
-              <Avatar source={{ uri: data.avatar }} />
+            {profile?.avatar ? (
+              <Avatar source={{ uri: profile.avatar }} />
             ) : (
               <EmptyAvatar />
             )}
           </AvatarBox>
           <DriverInfo>
-            <RegularText size="small">ID: #{data?.driverId}</RegularText>
-            <MediumText numberOfLines={1}>{data?.driverName}</MediumText>
+            <RegularText size="small">ID: #{profile?.driverId}</RegularText>
+            <MediumText numberOfLines={1}>{profile?.driverName}</MediumText>
           </DriverInfo>
           <Pressable onPress={confirmUserLogout}>
             <LogoutIcon />

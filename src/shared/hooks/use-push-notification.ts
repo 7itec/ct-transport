@@ -10,12 +10,12 @@ import {
   setBackgroundMessageHandler,
   subscribeToTopic,
 } from "@react-native-firebase/messaging";
-import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
+import useProfileStorage from "modules/users/storage/use-profile-storage";
 import { useEffect } from "react";
 import { notificationEmitter } from "util/notification-emitter";
 
 const usePushNotification = () => {
-  const { data } = useCurrentWorkJourney();
+  const { profile } = useProfileStorage();
   const messaging = getMessaging();
 
   const onMessageReceived = async ({
@@ -67,7 +67,7 @@ const usePushNotification = () => {
   };
 
   const setupUserTopics = async () => {
-    await subscribeToTopic(messaging, data!._id!);
+    await subscribeToTopic(messaging, profile!._id!);
   };
 
   useEffect(() => {
@@ -82,8 +82,8 @@ const usePushNotification = () => {
   }, []);
 
   useEffect(() => {
-    if (data?._id) setupUserTopics();
-  }, [data?._id]);
+    if (profile?._id) setupUserTopics();
+  }, [profile?._id]);
 };
 
 export default usePushNotification;

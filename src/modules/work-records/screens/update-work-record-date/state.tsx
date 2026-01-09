@@ -6,7 +6,7 @@ import Toast from "react-native-toast-message";
 import useUpdateWorkRecordDate from "modules/work-records/hooks/use-update-work-record-date";
 import useWorkRecord from "modules/work-records/hooks/use-work-record";
 import useLogs from "hooks/use-logs";
-import getGpsCoordinates from "modules/geolocation/hooks/get-gps-coordinates";
+import useGps from "modules/geolocation/hooks/use-gps";
 
 const useUpdateWorkRecordState = (workRecordId: string) => {
   const { data, isLoading } = useWorkRecord(workRecordId);
@@ -16,6 +16,7 @@ const useUpdateWorkRecordState = (workRecordId: string) => {
 
   const [date, setDate] = useState<Date>();
   const trackEvent = useLogs();
+  const { latitude, longitude } = useGps();
 
   useEffect(() => {
     if (previousDate && !date) setDate(new Date(previousDate));
@@ -56,8 +57,6 @@ const useUpdateWorkRecordState = (workRecordId: string) => {
       workRecordId,
       newRegistrationDate: date,
     });
-
-    const { latitude, longitude } = await getGpsCoordinates();
 
     updateWorkRecordDateMutation.mutate({
       newRegistrationDate: date,
