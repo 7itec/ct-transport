@@ -8,7 +8,6 @@ import { BorderlessButton } from "react-native-gesture-handler";
 import useDisplacementState from "./state";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { colors } from "assets/colors";
-import { StatusBar } from "expo-status-bar";
 import Loading from "components/loading";
 import Empty from "components/empty";
 import styled from "styled-components/native";

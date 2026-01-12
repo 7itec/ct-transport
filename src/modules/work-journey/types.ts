@@ -1,3 +1,4 @@
+import { VehicleProps } from "modules/checklist/types";
 import { TimesProps } from "types/times";
 
 export enum DriverStatus {
@@ -57,8 +58,8 @@ export type CurrentWorkJourneyProps = {
     date?: Date;
     job?: string;
   };
-  conductorVehicle?: any;
-  attachedVehicles: any[];
+  conductorVehicle?: VehicleProps;
+  attachedVehicles: VehicleProps[];
   driverStatus: DriverStatus;
   totalStopTimeInMinutes: number;
   lastWorkRecord: LastWorkRecordProps;

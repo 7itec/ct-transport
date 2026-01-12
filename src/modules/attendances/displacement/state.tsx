@@ -8,6 +8,7 @@ import { BottomSheetOptionProps } from "components/bottom-sheet";
 import axios from "axios";
 import locationIqToAdress from "util/location-iq-to-adress";
 import useLogs from "hooks/use-logs";
+import useCurrentWorkJourney from "modules/work-journey/hooks/use-current-work-journey";
 
 interface CreateDisplacementAddressProps {
   address: string;
@@ -37,6 +38,7 @@ const useDisplacementState = () => {
   const [showMap, setShowMap] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const trackEvent = useLogs();
+  const { data } = useCurrentWorkJourney();
 
   const createDisplacementMutation = useCreateDisplacement();
 
@@ -129,7 +131,9 @@ const useDisplacementState = () => {
     createDisplacementMutation.mutate({
       type,
       startDate,
+      driverId: data?.driverId,
       recipientAddress: address,
+      vehiclePlate: data?.currentWorkJourney?.conductorVehicle?.plate,
     });
   };
 
